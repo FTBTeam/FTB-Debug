@@ -6,11 +6,10 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
-	"runtime"
-
 	"io"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"time"
 )
 

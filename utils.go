@@ -1,14 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"github.com/StackExchange/wmi"
 	"log"
 	"os"
-	"os/exec"
-	"regexp"
-	"runtime"
 )
 
 const (
@@ -41,32 +36,20 @@ func ByteCountIEC(b int64) string {
 		float64(b)/float64(div), "KMGTPE"[exp])
 }
 
-type Win32_OperatingSystem struct {
-	Caption string
-	Version string
-}
-
-func getOSInfo() (oSystem string, version string, err error){
-	switch runtime.GOOS {
-	case "windows":
-		var dst []Win32_OperatingSystem
-
-		q := wmi.CreateQuery(&dst, "")
-		err := wmi.Query(q, &dst)
-		if err != nil {
-			return "", "", err
-		}
-		return dst[0].Caption, dst[0].Version, nil
-	case "darwin":
-		out, err := exec.Command("sw_vers").Output()
-		if err != nil {
-			return "", "", err
-		}
-		darwinRe := regexp.MustCompile(`ProductVersion:\W([0-9]*\.?[0-9?]*\.?[0-9?]*)`)
-		match := darwinRe.FindStringSubmatch(string(out))
-		return "", match[1], nil
-	default:
-		return "", "", errors.New("unable to determine operating system")
-	}
-
-}
+//func getOSInfo() (oSystem string, version string, err error){
+//	switch runtime.GOOS {
+//	case "windows":
+//		oSystem, version, err = winOS()
+//		return oSystem, version, err
+//	case "darwin":
+//		out, err := exec.Command("sw_vers").Output()
+//		if err != nil {
+//			return "", "", err
+//		}
+//		darwinRe := regexp.MustCompile(`ProductVersion:\W([0-9]*\.?[0-9?]*\.?[0-9?]*)`)
+//		match := darwinRe.FindStringSubmatch(string(out))
+//		return "", match[1], nil
+//	default:
+//		return "", "", errors.New("unable to determine operating system")
+//	}
+//}
