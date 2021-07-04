@@ -1,3 +1,5 @@
+github.com/Gaz492/haste v0.0.0-20210704220451-1196552cf55a h1:3Gr3lRcumPzC931CKvGbghebVu4Lp6YueXWC6RIEX1k=
+github.com/Gaz492/haste v0.0.0-20210704220451-1196552cf55a/go.mod h1:1cWxhgS25ECtSd3HmfuIqpf41C3lh8H7usrsL3NHdbc=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/atomicgo/cursor v0.0.1 h1:xdogsqa6YYlLfM+GyClC/Lchf7aiMerFiZQn7soTOoU=
