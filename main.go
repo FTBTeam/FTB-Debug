@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/eiannone/keyboard"
+	"github.com/Gaz492/haste"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -14,16 +14,18 @@ import (
 	"os/user"
 	"path"
 	"runtime"
+	"strings"
 	"time"
 )
 
 var(
-	tmpLog string
+	logFile *os.File
 	logMw io.Writer
 )
 
-func init(){
+func main() {
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
+	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
@@ -32,13 +34,10 @@ func init(){
 	if err != nil {
 		pterm.Fatal.Println(err)
 	}
-	tmpLog = logFile.Name()
 	defer cleanup(logFile)
 	logMw = io.MultiWriter(os.Stdout, logFile)
 	pterm.SetDefaultOutput(logMw)
-}
 
-func main() {
 	logo, _ := pterm.DefaultBigText.WithLetters(
 		pterm.NewLettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),
 		pterm.NewLettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
@@ -75,23 +74,39 @@ func main() {
 	}
 	log.Println(usr)
 
+	pterm.DefaultSection.Println("Debug Report Completed")
+
+	tUpload, err := ioutil.ReadFile(logFile.Name())
+	if err != nil {
+		pterm.Error.Println("Failed to upload support file...")
+		pterm.Error.Println(err)
+	} else {
+		resp, err := hasteClient.UploadBytes(tUpload)
+		if err != nil {
+			pterm.Error.Println("Failed to upload support file...")
+			pterm.Error.Println(err)
+		} else {
+			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println("Please provide this code to support: FTB-DBG", strings.ToUpper(resp.Key))
+		}
+	}
+
 	pterm.Info.Println("Press ESC to exit...")
 
-	if err := keyboard.Open(); err != nil {
-		panic(err)
-	}
-	defer func() {
-		_ = keyboard.Close()
-	}()
-	for {
-		_, key, err := keyboard.GetKey()
-		if err != nil {
-			panic(err)
-		}
-		if key == keyboard.KeyEsc {
-			break
-		}
-	}
+	//if err := keyboard.Open(); err != nil {
+	//	panic(err)
+	//}
+	//defer func() {
+	//	_ = keyboard.Close()
+	//}()
+	//for {
+	//	_, key, err := keyboard.GetKey()
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	if key == keyboard.KeyEsc {
+	//		break
+	//	}
+	//}
 }
 
 func checkMinecraftBin(filePath string){
