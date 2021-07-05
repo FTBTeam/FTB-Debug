@@ -23,17 +23,21 @@ var(
 	logMw io.Writer
 )
 
-func main() {
+func init(){
+	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
 	}
-	logFile, err := ioutil.TempFile("", "ftb-debug-log")
+	logFile, err = ioutil.TempFile("", "ftb-debug-log")
 	if err != nil {
 		pterm.Fatal.Println(err)
 	}
+}
+
+func main() {
 	defer cleanup(logFile)
 	logMw = io.MultiWriter(os.Stdout, logFile)
 	pterm.SetDefaultOutput(logMw)
@@ -86,7 +90,7 @@ func main() {
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
-			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println("Please provide this code to support: FTB-DBG", strings.ToUpper(resp.Key))
+			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println(fmt.Sprintf("Please provide this code to support: FTB-DBG%s", strings.ToUpper(resp.Key)))
 		}
 	}
 
