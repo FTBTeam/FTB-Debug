@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"github.com/Gaz492/haste"
 	"github.com/pterm/pterm"
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/mem"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"path"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -51,25 +48,7 @@ func main() {
 	pterm.Debug.Println("Verbose logging enabled")
 
 	pterm.DefaultSection.Println("System Information")
-	cpuInfo, _ := cpu.Info()
-	memInfo, _ := mem.VirtualMemory()
-	oSystem, err := getOSInfo()
-	if err == nil {
-		if oSystem != "" {
-			pterm.Info.Println(fmt.Sprintf("OS: %s", oSystem))
-		} else {
-			pterm.Info.Println(fmt.Sprintf("OS: %s", runtime.GOOS))
-		}
-	} else {
-		pterm.Info.Println(fmt.Sprintf("OS: %s", runtime.GOOS))
-	}
-	pterm.Info.Println(fmt.Sprintf("CPU: %s (%s)", cpuInfo[0].ModelName, cpuInfo[0].VendorID))
-	pterm.Info.Println(fmt.Sprintf("Memory: %s / %s (%.2f%% used)", ByteCountIEC(int64(memInfo.Used)), ByteCountIEC(int64(memInfo.Total)), memInfo.UsedPercent))
-
-	javaHome := os.Getenv("JAVA_HOME")
-	if javaHome != "" {
-		pterm.Info.Println("Java Home:", javaHome)
-	}
+	getOSInfo()
 
 	pterm.DefaultSection.Println("FTB App Checks")
 	usr, err := user.Current()
@@ -115,9 +94,9 @@ func main() {
 
 func checkMinecraftBin(filePath string){
 	pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
-	binExists := checkFilePathSpinner("bin directory", path.Join(filePath, "bin"))
+	binExists := checkFilePathExistsSpinner("bin directory", path.Join(filePath, "bin"))
 	if binExists {
-		checkFilePathSpinner("minecraft launcher", path.Join(filePath, "bin", "launcher.exe"))
+		checkFilePathExistsSpinner("minecraft launcher", path.Join(filePath, "bin", "launcher.exe"))
 		validateJson("minecraft launcher profiles", path.Join(filePath, "bin", "launcher_profiles.json"))
 	}
 }

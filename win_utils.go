@@ -7,12 +7,14 @@ import (
 	"github.com/StackExchange/wmi"
 )
 
-type Win32_OperatingSystem struct {
-	Caption string
-	Version string
-}
+type (
+	Win32_OperatingSystem struct {
+		Caption string
+		Version string
+	}
+)
 
-func getOSInfo() (oSystem string, err error){
+func getSysInfo() (oSystem string, err error){
 	var dst []Win32_OperatingSystem
 
 	q := wmi.CreateQuery(&dst, "")
@@ -22,4 +24,8 @@ func getOSInfo() (oSystem string, err error){
 	}
 	oSystem = fmt.Sprintf("%s (%s)", dst[0].Caption, dst[0].Version)
 	return oSystem, nil
+}
+
+func locateApp(){
+	
 }

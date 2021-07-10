@@ -10,7 +10,7 @@ import (
 	"runtime"
 )
 
-func getOSInfo() (oSystem string, err error){
+func getSysInfo() (oSystem string, err error){
 	switch runtime.GOOS {
 	case "linux":
 		out, err := exec.Command("hostnamectl").Output()

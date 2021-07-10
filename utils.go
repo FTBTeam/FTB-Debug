@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/Gaz492/haste"
 	"github.com/pterm/pterm"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,10 +16,19 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
 var hasteClient *haste.Haste
+
+type(
+	appLocation struct {
+		Path string
+
+	}
+
+)
 
 func cleanup(logFile *os.File) {
 	if err := logFile.Close(); err != nil {
@@ -43,7 +54,7 @@ func ByteCountIEC(b int64) string {
 }
 
 func validateJson(message string, filePath string) {
-	jsonF := checkFilePathSpinner(message, filePath)
+	jsonF := checkFilePathExistsSpinner(message, filePath)
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
 		if err != nil {
@@ -62,7 +73,29 @@ func validateJson(message string, filePath string) {
 	}
 }
 
-func checkFilePathSpinner(dirMessage string, filePath string) bool {
+func getOSInfo(){
+	cpuInfo, _ := cpu.Info()
+	memInfo, _ := mem.VirtualMemory()
+	oSystem, err := getSysInfo()
+	if err == nil {
+		if oSystem != "" {
+			pterm.Info.Println(fmt.Sprintf("OS: %s", oSystem))
+		} else {
+			pterm.Info.Println(fmt.Sprintf("OS: %s", runtime.GOOS))
+		}
+	} else {
+		pterm.Info.Println(fmt.Sprintf("OS: %s", runtime.GOOS))
+	}
+	pterm.Info.Println(fmt.Sprintf("CPU: %s (%s)", cpuInfo[0].ModelName, cpuInfo[0].VendorID))
+	pterm.Info.Println(fmt.Sprintf("Memory: %s / %s (%.2f%% used)", ByteCountIEC(int64(memInfo.Used)), ByteCountIEC(int64(memInfo.Total)), memInfo.UsedPercent))
+
+	javaHome := os.Getenv("JAVA_HOME")
+	if javaHome != "" {
+		pterm.Info.Println("Java Home:", javaHome)
+	}
+}
+
+func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
 	dirStatus, _ := pterm.DefaultSpinner.Start("Checking for ", dirMessage)
 	message, success := checkFilePath(filePath)
 	if !success {
