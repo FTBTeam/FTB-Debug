@@ -22,14 +22,6 @@ import (
 
 var hasteClient *haste.Haste
 
-type(
-	appLocation struct {
-		Path string
-
-	}
-
-)
-
 func cleanup(logFile *os.File) {
 	if err := logFile.Close(); err != nil {
 		log.Fatal("Unable to close temp log file: ", err)

@@ -7,7 +7,6 @@ import (
 	"github.com/pterm/pterm"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/user"
 	"path"
@@ -16,6 +15,7 @@ import (
 )
 
 var(
+	ftbApp FTBApp
 	logFile *os.File
 	logMw io.Writer
 )
@@ -55,7 +55,14 @@ func main() {
 	if err != nil {
 		pterm.Error.Println("Failed to get users home directory")
 	}
-	log.Println(usr)
+	ftbApp.User = usr
+
+	//App checks here
+	located := locateApp()
+	if !located {
+		os.Exit(1)
+	}
+	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 

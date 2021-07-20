@@ -5,6 +5,9 @@ package main
 import (
 	"fmt"
 	"github.com/StackExchange/wmi"
+	"github.com/pterm/pterm"
+	"os"
+	"path"
 )
 
 type (
@@ -14,7 +17,7 @@ type (
 	}
 )
 
-func getSysInfo() (oSystem string, err error){
+func getSysInfo() (oSystem string, err error) {
 	var dst []Win32_OperatingSystem
 
 	q := wmi.CreateQuery(&dst, "")
@@ -26,6 +29,15 @@ func getSysInfo() (oSystem string, err error){
 	return oSystem, nil
 }
 
-func locateApp(){
-	
+func locateApp() bool {
+	if checkFilePathExistsSpinner("FTB App directory (AppData)", path.Join(os.Getenv("localappdata"), ".ftba")) {
+		ftbApp.InstallLocation = path.Join(os.Getenv("localappdata"), ".ftba")
+		return true
+	} else if checkFilePathExistsSpinner("FTB App directory (home)", path.Join(ftbApp.User.HomeDir, ".ftba")) {
+		ftbApp.InstallLocation = path.Join(ftbApp.User.HomeDir, ".ftba")
+		return true
+	} else {
+		pterm.Error.Println("Unable to find app install")
+		return false
+	}
 }

@@ -5,12 +5,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/pterm/pterm"
 	"os/exec"
 	"regexp"
 	"runtime"
 )
 
-func getSysInfo() (oSystem string, err error){
+func getSysInfo() (oSystem string, err error) {
 	switch runtime.GOOS {
 	case "linux":
 		out, err := exec.Command("hostnamectl").Output()
@@ -39,5 +40,28 @@ func getSysInfo() (oSystem string, err error){
 		return "", nil
 	default:
 		return "", errors.New("unable to determine operating system")
+	}
+}
+
+func locateApp() bool {
+	if runtime.GOOS == "darwin" {
+		if checkFilePathExistsSpinner("FTB App directory (Application Support)", path.Join(os.Getenv("HOME"), "Library", "Application Support")) {
+			ftbApp.InstallLocation = path.Join(os.Getenv("HOME"), "Library", "Application Support")
+			return true
+		} else {
+			pterm.Error.Println("Unable to find app install")
+			return false
+		}
+	} else if runtime.GOOS == "linux" {
+		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", path.Join(ftbApp.User.HomeDir, ".ftba")) {
+			ftbApp.InstallLocation = path.Join(ftbApp.User.HomeDir, ".ftba")
+			return true
+		} else {
+			pterm.Error.Println("Unable to find app install")
+			return false
+		}
+	} else {
+		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
+		return false
 	}
 }
