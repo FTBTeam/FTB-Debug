@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"runtime"
 )
@@ -64,4 +66,10 @@ func locateApp() bool {
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
 		return false
 	}
+}
+
+func getAppVersion(){
+	ftbApp.AppVersion = "N/A"
+
+
 }
