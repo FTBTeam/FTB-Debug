@@ -19,6 +19,7 @@ var(
 	ftbApp FTBApp
 	logFile *os.File
 	logMw io.Writer
+	owUID = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 )
 
 func init(){
@@ -60,18 +61,18 @@ func main() {
 
 	//App checks here
 	located := locateApp()
-	if !located {
-		os.Exit(1)
+	if located {
+		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
+		getAppVersion()
+		pterm.Info.Println("App version:", ftbApp.AppVersion)
+		//TODO Add instance checking and settings file validation
+
+
+		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
+		checkMinecraftBin()
+
+		uploadFiles()
 	}
-	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
-	getAppVersion()
-	//TODO Add instance checking and settings file validation
-
-
-	pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
-	checkMinecraftBin()
-
-	//TODO do uploading of log files
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 

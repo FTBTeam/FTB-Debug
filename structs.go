@@ -8,5 +8,6 @@ type (
 		OWLocation string
 		InstallLocation string
 		AppVersion string
+		BackendVersion string
 	}
 )
