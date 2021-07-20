@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -63,6 +64,14 @@ func main() {
 		os.Exit(1)
 	}
 	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
+	getAppVersion()
+	//TODO Add instance checking and settings file validation
+
+
+	pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
+	checkMinecraftBin()
+
+	//TODO do uploading of log files
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 
@@ -99,12 +108,24 @@ func main() {
 	//}
 }
 
-func checkMinecraftBin(filePath string){
-	pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
-	binExists := checkFilePathExistsSpinner("bin directory", path.Join(filePath, "bin"))
+func uploadFiles() {
+	appLocal, _ := os.UserCacheDir()
+	hasteClient = haste.NewHaste("https://pste.ch")
+	uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
+	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
+	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
+	if runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "index.html.log"))
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "chat.html.log"))
+	}
+}
+
+func checkMinecraftBin(){
+	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
-		checkFilePathExistsSpinner("minecraft launcher", path.Join(filePath, "bin", "launcher.exe"))
-		validateJson("minecraft launcher profiles", path.Join(filePath, "bin", "launcher_profiles.json"))
+		checkFilePathExistsSpinner("Minecraft launcher", path.Join(ftbApp.InstallLocation, "bin", "launcher.exe"))
+		validateJson("Minecraft launcher profiles", path.Join(ftbApp.InstallLocation, "bin", "launcher_profiles.json"))
 	}
 }
 

@@ -31,6 +31,21 @@ func cleanup(logFile *os.File) {
 	}
 }
 
+//TODO implement getting app version from overwolf
+func getAppVersion(){
+	appLocal, _ := os.UserCacheDir()
+	files, err := ioutil.ReadDir(path.Join(appLocal, "Overwolf", "Extensions", "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"))
+	if err != nil {
+		pterm.Error.Println("Error while reading Overwolf versions")
+		return
+	}
+	for _, file := range files {
+		if file.IsDir() {
+			pterm.Info.Println(file.Name())
+		}
+	}
+}
+
 func ByteCountIEC(b int64) string {
 	const unit = 1024
 	if b < unit {
