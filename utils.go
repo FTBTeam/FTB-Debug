@@ -31,21 +31,6 @@ func cleanup(logFile *os.File) {
 	}
 }
 
-//TODO implement getting app version from overwolf
-func getAppVersion(){
-	appLocal, _ := os.UserCacheDir()
-	files, err := ioutil.ReadDir(path.Join(appLocal, "Overwolf", "Extensions", "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"))
-	if err != nil {
-		pterm.Error.Println("Error while reading Overwolf versions")
-		return
-	}
-	for _, file := range files {
-		if file.IsDir() {
-			pterm.Info.Println(file.Name())
-		}
-	}
-}
-
 func ByteCountIEC(b int64) string {
 	const unit = 1024
 	if b < unit {
@@ -73,10 +58,10 @@ func validateJson(message string, filePath string) {
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 		valid := json.Valid(byteValue)
 		if !valid {
-			pterm.Error.Println(message, ": is invalid")
+			pterm.Error.Println(fmt.Sprintf("%s: is invalid", message))
 			return
 		}
-		pterm.Success.Println(message, ": json is valid")
+		pterm.Success.Println(fmt.Sprintf("%s: json is valid", message))
 	}
 }
 
@@ -103,14 +88,14 @@ func getOSInfo(){
 }
 
 func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
-	dirStatus, _ := pterm.DefaultSpinner.Start("Checking for ", dirMessage)
+	dirStatus, _ := pterm.DefaultSpinner.Start("Checking for", dirMessage)
 	message, success := checkFilePath(filePath)
 	if !success {
-		dirStatus.Warning(dirMessage, ": ", message)
+		dirStatus.Warning(fmt.Sprintf("%s: %s", dirMessage, message))
 		return false
 	}
 
-	dirStatus.Success(dirMessage, ": ", message)
+	dirStatus.Success(fmt.Sprintf("%s: %s", dirMessage, message))
 	return true
 }
 
@@ -128,18 +113,24 @@ func checkFilePath(filePath string) (string, bool) {
 
 func uploadFile(filePath string, name string) {
 	data, err := ioutil.ReadFile(path.Join(filePath, name))
+	if name == "bin/launcher_profiles.json" {
+		data, err = sanitiseProfile(data)
+		if err != nil {
+			return
+		}
+	}
 	if err != nil {
-		pterm.Warning.Println("Uploading ", name, ": failed to open file")
+		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file", name))
 	} else {
 		resp, err := hasteClient.UploadBytes(data)
 		if err != nil {
-			pterm.Warning.Println("Uploading ", name, ": failed to upload - ", err.Error())
+			pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to upload - %s", name, err.Error()))
 			if err.Error() == "file too large" {
 				pterm.Info.Println("Trying again with transfer.sh")
 				uploadBigFile(filePath, name)
 			}
 		} else {
-			pterm.Success.Println("Uploaded ", name, ": ", resp.GetLink(hasteClient))
+			pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name, resp.GetLink(hasteClient)))
 		}
 	}
 }
@@ -147,24 +138,24 @@ func uploadFile(filePath string, name string) {
 func uploadBigFile(filePath string, name string) {
 	req, err := newfileUploadRequest(path.Join(filePath, name))
 	if err != nil {
-		pterm.Error.Println("Uploading " + name + ": failed to upload")
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		pterm.Error.Println("Uploading " + name + ": failed to upload")
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		pterm.Error.Println("Uploading " + name + ": failed to upload")
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	} else {
-		pterm.Success.Println("Uploaded " + name + ": " + strings.TrimSuffix(string(body), "\n"))
+		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name , strings.TrimSuffix(string(body), "\n")))
 	}
 
 }
@@ -192,4 +183,24 @@ func newfileUploadRequest(path string) (*http.Request, error) {
 	req, err := http.NewRequest("POST", "https://transfer.sh", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req, err
+}
+
+func sanitiseProfile(data []byte)(sanitisedData []byte, err error) {
+	var i interface{}
+	if err = json.Unmarshal(data, &i); err != nil {
+		pterm.Error.Println("Error reading launcher profile:", err)
+		pterm.Debug.Println("JSON data:", string(data))
+		return nil, err
+	}
+	if m, ok := i.(map[string]interface{}); ok {
+		delete(m, "authenticationDatabase")
+		delete(m, "clientToken")
+	}
+	output, err := json.MarshalIndent(i, "", "  ")
+	if err != nil {
+		pterm.Error.Println("Error marshaling json:", err)
+		return nil, err
+	}
+	//pterm.Debug.Println(string(output))
+	return output, nil
 }
