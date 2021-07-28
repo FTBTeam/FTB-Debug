@@ -62,6 +62,7 @@ func validateJson(message string, filePath string) {
 			return
 		}
 		pterm.Success.Println(fmt.Sprintf("%s: json is valid", message))
+		ftbApp.Structure.MCBin.Profile = true
 	}
 }
 
@@ -88,7 +89,7 @@ func getOSInfo() {
 }
 
 func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
-	dirStatus, _ := pterm.DefaultSpinner.Start("Checking for ", dirMessage)
+	dirStatus, _ := pterm.DefaultSpinner.Start("Checking ", "for ", dirMessage)
 	message, success := checkFilePath(filePath)
 	if !success {
 		dirStatus.Warning(fmt.Sprintf("%s: %s", dirMessage, message))

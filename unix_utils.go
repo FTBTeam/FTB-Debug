@@ -3,8 +3,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/layeh/asar"
 	"github.com/pterm/pterm"
 	"os"
 	"os/exec"
@@ -69,7 +71,32 @@ func locateApp() bool {
 }
 
 func getAppVersion(){
-	ftbApp.AppVersion = "N/A"
+	ftbApp.AppVersion = "Electron"
+	f, err := os.Open(path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar"))
+	if err != nil {
+		pterm.Error.Println(err)
+		return
+	}
+	defer f.Close()
 
+	archive, err := asar.Decode(f)
+	if err != nil {
+		pterm.Error.Println(err)
+		return
+	}
 
+	versionRaw := archive.Find("version.json")
+	if versionRaw == nil {
+		pterm.Error.Println("file not found")
+		return
+	}
+	var versionJson VersionJson
+	err = json.Unmarshal(versionRaw.Bytes(), &versionJson)
+	if err != nil {
+		pterm.Error.Println("JSON unmarshal error")
+		return
+	}
+	ftbApp.JarVersion = versionJson.JarVersion
+	ftbApp.WebVersion = versionJson.WebVersion
+	ftbApp.AppBranch = versionJson.Branch
 }

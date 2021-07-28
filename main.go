@@ -40,7 +40,6 @@ func init() {
 		Style: pterm.NewStyle(pterm.BgLightMagenta, pterm.FgBlack),
 	}
 	pterm.Debug.MessageStyle = pterm.NewStyle(98)
-
 }
 
 func main() {
@@ -124,7 +123,9 @@ func main() {
 func uploadFiles() {
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
-	uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
+	if ftbApp.Structure.MCBin.Exists && ftbApp.Structure.MCBin.Profile {
+		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
+	}
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
 	if runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
@@ -137,6 +138,7 @@ func uploadFiles() {
 func checkMinecraftBin() {
 	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
+		ftbApp.Structure.MCBin.Exists = true
 		checkFilePathExistsSpinner("Minecraft launcher", path.Join(ftbApp.InstallLocation, "bin", "launcher.exe"))
 		validateJson("Minecraft launcher profiles", path.Join(ftbApp.InstallLocation, "bin", "launcher_profiles.json"))
 	}
