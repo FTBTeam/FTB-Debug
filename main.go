@@ -65,6 +65,9 @@ func main() {
 		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
 		getAppVersion()
 		pterm.Info.Println("App version:", ftbApp.AppVersion)
+		pterm.Info.Println("Backend version:", ftbApp.JarVersion)
+		pterm.Info.Println("Web version:", ftbApp.WebVersion)
+		pterm.Info.Println("Branch:", ftbApp.AppBranch)
 		//TODO Add instance checking and settings file validation
 
 

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/StackExchange/wmi"
 	"github.com/hashicorp/go-version"
@@ -24,7 +25,8 @@ type (
 func getAppVersion(){
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
-	files, err := ioutil.ReadDir(path.Join(appLocal, "Overwolf", "Extensions", owUID))
+	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)
+	files, err := ioutil.ReadDir(overwolfDIR)
 	if err != nil {
 		pterm.Error.Println("Error while reading Overwolf versions")
 		return
@@ -43,7 +45,18 @@ func getAppVersion(){
 	pterm.Debug.Println("Found versions:", versions)
 	ftbApp.AppVersion = versions[0].String()
 
-
+	jsonFile, err := os.Open(path.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		pterm.Error.Println("Error opening version.json:", err)
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var versionJson VersionJson
+	json.Unmarshal(byteValue, &versionJson)
+	ftbApp.JarVersion = versionJson.JarVersion
+	ftbApp.WebVersion = versionJson.WebVersion
+	ftbApp.AppBranch = versionJson.Branch
 }
 
 func getSysInfo() (oSystem string, err error) {
