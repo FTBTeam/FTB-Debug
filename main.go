@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Gaz492/haste"
+	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
 	"io"
 	"io/ioutil"
@@ -34,6 +35,12 @@ func init(){
 	if err != nil {
 		pterm.Fatal.Println(err)
 	}
+	pterm.Debug.Prefix = pterm.Prefix{
+		Text: "DEBUG",
+		Style: pterm.NewStyle(pterm.BgLightMagenta, pterm.FgBlack),
+	}
+	pterm.Debug.MessageStyle = pterm.NewStyle(98)
+
 }
 
 func main() {
@@ -68,12 +75,14 @@ func main() {
 		pterm.Info.Println("Backend version:", ftbApp.JarVersion)
 		pterm.Info.Println("Web version:", ftbApp.WebVersion)
 		pterm.Info.Println("Branch:", ftbApp.AppBranch)
+
 		//TODO Add instance checking and settings file validation
 
-
 		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
+		// Validate Minecraft bin folder exists
 		checkMinecraftBin()
 
+		// Upload info and logs
 		uploadFiles()
 	}
 
@@ -95,21 +104,21 @@ func main() {
 
 	pterm.Info.Println("Press ESC to exit...")
 
-	//if err := keyboard.Open(); err != nil {
-	//	panic(err)
-	//}
-	//defer func() {
-	//	_ = keyboard.Close()
-	//}()
-	//for {
-	//	_, key, err := keyboard.GetKey()
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	if key == keyboard.KeyEsc {
-	//		break
-	//	}
-	//}
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
+	for {
+		_, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+		if key == keyboard.KeyEsc {
+			break
+		}
+	}
 }
 
 func uploadFiles() {
