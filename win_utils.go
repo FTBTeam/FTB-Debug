@@ -22,7 +22,7 @@ type (
 )
 
 //TODO implement getting app version from overwolf
-func getAppVersion(){
+func getAppVersion() {
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
 	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)

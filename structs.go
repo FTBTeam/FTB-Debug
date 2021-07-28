@@ -2,12 +2,6 @@ package main
 
 import "os/user"
 
-type VersionJson struct {
-	JarVersion string `json:"jarVersion"`
-	WebVersion string `json:"webVersion"`
-	Branch     string `json:"branch"`
-}
-
 type (
 	FTBApp struct {
 		User            *user.User
@@ -17,5 +11,11 @@ type (
 		JarVersion      string
 		WebVersion      string
 		AppBranch       string
+	}
+
+	VersionJson struct {
+		JarVersion string `json:"jarVersion"`
+		WebVersion string `json:"webVersion"`
+		Branch     string `json:"branch"`
 	}
 )

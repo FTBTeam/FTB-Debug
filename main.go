@@ -16,14 +16,14 @@ import (
 	"time"
 )
 
-var(
-	ftbApp FTBApp
+var (
+	ftbApp  FTBApp
 	logFile *os.File
-	logMw io.Writer
-	owUID = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	logMw   io.Writer
+	owUID   = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 )
 
-func init(){
+func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	hasteClient = haste.NewHaste("https://pste.ch")
@@ -36,7 +36,7 @@ func init(){
 		pterm.Fatal.Println(err)
 	}
 	pterm.Debug.Prefix = pterm.Prefix{
-		Text: "DEBUG",
+		Text:  "DEBUG",
 		Style: pterm.NewStyle(pterm.BgLightMagenta, pterm.FgBlack),
 	}
 	pterm.Debug.MessageStyle = pterm.NewStyle(98)
@@ -134,11 +134,10 @@ func uploadFiles() {
 	}
 }
 
-func checkMinecraftBin(){
+func checkMinecraftBin() {
 	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		checkFilePathExistsSpinner("Minecraft launcher", path.Join(ftbApp.InstallLocation, "bin", "launcher.exe"))
 		validateJson("Minecraft launcher profiles", path.Join(ftbApp.InstallLocation, "bin", "launcher_profiles.json"))
 	}
 }
-

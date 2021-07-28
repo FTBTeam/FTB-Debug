@@ -65,7 +65,7 @@ func validateJson(message string, filePath string) {
 	}
 }
 
-func getOSInfo(){
+func getOSInfo() {
 	cpuInfo, _ := cpu.Info()
 	memInfo, _ := mem.VirtualMemory()
 	oSystem, err := getSysInfo()
@@ -155,7 +155,7 @@ func uploadBigFile(filePath string, name string) {
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	} else {
-		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name , strings.TrimSuffix(string(body), "\n")))
+		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name, strings.TrimSuffix(string(body), "\n")))
 	}
 
 }
@@ -185,7 +185,7 @@ func newfileUploadRequest(path string) (*http.Request, error) {
 	return req, err
 }
 
-func sanitiseProfile(data []byte)(sanitisedData []byte, err error) {
+func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 	var i interface{}
 	if err = json.Unmarshal(data, &i); err != nil {
 		pterm.Error.Println("Error reading launcher profile:", err)
