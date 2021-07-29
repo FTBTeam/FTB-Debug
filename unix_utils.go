@@ -89,7 +89,11 @@ func getAppVersion() {
 	} else if runtime.GOOS == "linux" {
 		appPath = path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
 	} else {
-
+		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
+		ftbApp.JarVersion = "N/A"
+		ftbApp.WebVersion = "N/A"
+		ftbApp.AppBranch = "N/A"
+		return
 	}
 	f, err := os.Open(appPath)
 	if err != nil {
