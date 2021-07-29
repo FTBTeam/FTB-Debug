@@ -70,9 +70,28 @@ func locateApp() bool {
 	}
 }
 
-func getAppVersion(){
+func getAppVersion() {
 	ftbApp.AppVersion = "Electron"
-	f, err := os.Open(path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar"))
+	var appPath string
+	if runtime.GOOS == "darwin" {
+		appPath = path.Join(ftbApp.User.HomeDir, "Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
+		installExists := checkFilePathExistsSpinner("App install (User home)", appPath)
+		if !installExists {
+			appPath = path.Join("/Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
+			installExists = checkFilePathExistsSpinner("App install (User home)", appPath)
+			if !installExists {
+				ftbApp.JarVersion = "N/A"
+				ftbApp.WebVersion = "N/A"
+				ftbApp.AppBranch = "N/A"
+				return
+			}
+		}
+	} else if runtime.GOOS == "linux" {
+		appPath = path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
+	} else {
+
+	}
+	f, err := os.Open(appPath)
 	if err != nil {
 		pterm.Error.Println(err)
 		return
