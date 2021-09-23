@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Gaz492/haste"
 	"github.com/pterm/pterm"
@@ -45,13 +46,13 @@ func ByteCountIEC(b int64) string {
 		float64(b)/float64(div), "KMGTPE"[exp])
 }
 
-func validateJson(message string, filePath string) {
+func validateJson(message string, filePath string) (bool, error) {
 	jsonF := checkFilePathExistsSpinner(message, filePath)
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
 		if err != nil {
 			pterm.Error.Println(message, ": failed to load file\n", err)
-			return
+			return false, err
 		}
 
 		defer jsonFile.Close()
@@ -59,11 +60,12 @@ func validateJson(message string, filePath string) {
 		valid := json.Valid(byteValue)
 		if !valid {
 			pterm.Error.Println(fmt.Sprintf("%s: is invalid", message))
-			return
+			return false, err
 		}
 		pterm.Success.Println(fmt.Sprintf("%s: json is valid", message))
-		ftbApp.Structure.MCBin.Profile = true
+		return true, nil
 	}
+	return false, errors.New(fmt.Sprintf("Unable to validate %s\nUnable to find file %s", message, filePath))
 }
 
 func getOSInfo() {
