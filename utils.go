@@ -122,6 +122,12 @@ func uploadFile(filePath string, name string) {
 			return
 		}
 	}
+	if name == "bin/settings.json" {
+		data, err = sanitiseSettings(data)
+		if err != nil {
+			return
+		}
+	}
 	if err != nil {
 		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file", name))
 	} else {
@@ -199,6 +205,23 @@ func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 		delete(m, "authenticationDatabase")
 		delete(m, "clientToken")
 	}
+	output, err := json.MarshalIndent(i, "", "  ")
+	if err != nil {
+		pterm.Error.Println("Error marshaling json:", err)
+		return nil, err
+	}
+	//pterm.Debug.Println(string(output))
+	return output, nil
+}
+
+func sanitiseSettings(data []byte) ([]byte, error){
+	var i AppSettings
+	if err := json.Unmarshal(data, &i); err != nil {
+		pterm.Error.Println("Error reading app settings:", err)
+		pterm.Debug.Println("JSON data:", string(data))
+		return nil, err
+	}
+	i.SessionString = "<censored>"
 	output, err := json.MarshalIndent(i, "", "  ")
 	if err != nil {
 		pterm.Error.Println("Error marshaling json:", err)
