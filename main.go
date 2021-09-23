@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/Gaz492/haste"
@@ -11,6 +13,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -21,6 +24,7 @@ var (
 	logFile *os.File
 	logMw   io.Writer
 	owUID   = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
 )
 
 func init() {
@@ -68,6 +72,10 @@ func main() {
 	//App checks here
 	located := locateApp()
 	if located {
+		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
+		// Validate Minecraft bin folder exists
+		checkMinecraftBin()
+		pterm.DefaultSection.WithLevel(2).Println("App info")
 		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
 		getAppVersion()
 		pterm.Info.Println("App version:", ftbApp.AppVersion)
@@ -76,12 +84,22 @@ func main() {
 		pterm.Info.Println("Branch:", ftbApp.AppBranch)
 
 		//TODO Add instance checking and settings file validation
+		err := loadAppSettings()
+		if err != nil {
+			pterm.Error.Println("Failed to load app settings:\n", err)
+		} else {
+			pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
+			if ftbApp.Settings.Jvmargs != ""{
+				pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
+			}
 
-		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
-		// Validate Minecraft bin folder exists
-		checkMinecraftBin()
+		}
+
+		pterm.DefaultSection.Println("Check for instances")
+		listInstances()
 
 		// Upload info and logs
+		pterm.DefaultSection.Println("Upload logs")
 		uploadFiles()
 	}
 
@@ -127,6 +145,7 @@ func uploadFiles() {
 		if ftbApp.Structure.MCBin.Profile {
 			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
 		}
+		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
 	}
@@ -149,5 +168,68 @@ func checkMinecraftBin() {
 			return
 		}
 		ftbApp.Structure.MCBin.Profile = true
+	}
+}
+
+func loadAppSettings() error {
+	if ftbApp.Structure.MCBin.Exists {
+		data, err := ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+		if err != nil {
+			pterm.Error.Println("Error reading app settings:", err)
+			return errors.New("error reading app settings")
+		}
+		var i AppSettings
+		if err := json.Unmarshal(data, &i); err != nil {
+			pterm.Error.Println("Error reading app settings:", err)
+			pterm.Debug.Println("JSON data:", string(data))
+			return err
+		}
+		ftbApp.Settings = i
+		return nil
+	} else {
+		return errors.New("MC bin folder missing")
+	}
+}
+
+func listInstances(){
+	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
+	if instancesExists {
+		instances, _ := ioutil.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
+		for _, instance := range instances {
+			name := instance.Name()
+			if instance.IsDir() {
+				if name != ".localCache" {
+					pterm.Info.Println("found instance: ", name)
+					var i Instance
+					data, err := ioutil.ReadFile(path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					if err := json.Unmarshal(data, &i); err != nil {
+						pterm.Error.Println("Error reading instance.json:", err)
+						pterm.Debug.Println("JSON data:", string(data))
+					}
+					pterm.Info.Println("Name:", i.Name)
+					pterm.Info.Println("Version:", i.Version)
+					pterm.Info.Println("Version ID:", i.VersionID)
+					pterm.Info.Println("Memory:", i.Memory)
+					pterm.Info.Println(fmt.Sprintf("Min/Rec Memory: %d/%d", i.MinMemory, i.RecMemory))
+					pterm.Info.Println("Custom Args:", i.JvmArgs)
+					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
+					pterm.Info.Println("Is Modified:", i.IsModified)
+					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+					if logFolderExists{
+						uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
+					}
+					validUuid := re.Find([]byte(name))
+					if validUuid == nil {
+						pterm.Error.Println(name, " instance name: invalid uuid")
+					}
+					_, err = validateJson(name+" instance.json", path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					if err != nil{
+						pterm.Error.Println("instance.json failed to validate")
+					}
+				}
+			} else {
+				pterm.Info.Println("found extra file in instances directory: ", name)
+			}
+		}
 	}
 }
