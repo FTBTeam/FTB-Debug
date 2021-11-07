@@ -156,6 +156,10 @@ func uploadFiles() {
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "chat.html.log"))
 	}
+	if runtime.GOOS == "darwin" {
+		electronLogPath := path.Join(ftbApp.User.HomeDir, "Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "MacOS")
+		uploadFile(ftbApp.InstallLocation, path.Join(electronLogPath, "electron.log"))
+	}
 }
 
 func checkMinecraftBin() {
