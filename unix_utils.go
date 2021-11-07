@@ -49,8 +49,8 @@ func getSysInfo() (oSystem string, err error) {
 
 func locateApp() bool {
 	if runtime.GOOS == "darwin" {
-		if checkFilePathExistsSpinner("FTB App directory (Application Support)", path.Join(os.Getenv("HOME"), "Library", "Application Support")) {
-			ftbApp.InstallLocation = path.Join(os.Getenv("HOME"), "Library", "Application Support")
+		if checkFilePathExistsSpinner("FTB App directory (Application Support)", path.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
+			ftbApp.InstallLocation = path.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
 			return true
 		} else {
 			pterm.Error.Println("Unable to find app install")
