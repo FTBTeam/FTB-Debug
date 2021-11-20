@@ -156,10 +156,6 @@ func uploadFiles() {
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "chat.html.log"))
 	}
-	if runtime.GOOS == "darwin" {
-		electronLogPath := path.Join(ftbApp.User.HomeDir, "Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "MacOS")
-		uploadFile(ftbApp.InstallLocation, path.Join(electronLogPath, "electron.log"))
-	}
 }
 
 func checkMinecraftBin() {
@@ -177,15 +173,27 @@ func checkMinecraftBin() {
 
 func loadAppSettings() error {
 	if ftbApp.Structure.MCBin.Exists {
-		data, err := ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
-		if err != nil {
-			pterm.Error.Println("Error reading app settings:", err)
-			return errors.New("error reading app settings")
+		var appSettings  []byte
+		var err error
+		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", path.Join(ftbApp.InstallLocation, "app_settings.json"))
+		if doesAppSettingsExist {
+			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
+			if err != nil {
+				pterm.Error.Println("Error reading app_settings.json:", err)
+                return errors.New("error reading app_settings.json")
+            }
+
+		}else {
+			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+            if err != nil {
+                pterm.Error.Println("Error reading settings.json:", err)
+                return errors.New("error reading settings.json")
+            }
 		}
 		var i AppSettings
-		if err := json.Unmarshal(data, &i); err != nil {
+		if err := json.Unmarshal(appSettings, &i); err != nil {
 			pterm.Error.Println("Error reading app settings:", err)
-			pterm.Debug.Println("JSON data:", string(data))
+			pterm.Debug.Println("JSON data:", string(appSettings))
 			return err
 		}
 		ftbApp.Settings = i
