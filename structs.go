@@ -12,7 +12,7 @@ type (
 		WebVersion      string
 		AppBranch       string
 		Structure       AppStructure
-		Settings		AppSettings
+		Settings        AppSettings
 	}
 
 	AppSettings struct {
@@ -75,12 +75,12 @@ type (
 	}
 
 	AppStructure struct {
-		MCBin MinecraftBin
+		Bin Bin
 	}
 
-	MinecraftBin struct {
-		Exists  bool
-		Profile bool
+	Bin struct {
+		Exists bool
+		//Profile bool
 	}
 
 	VersionJson struct {

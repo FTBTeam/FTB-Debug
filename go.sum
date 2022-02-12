@@ -1,6 +1,5 @@
 github.com/Gaz492/haste v0.0.0-20210704220451-1196552cf55a h1:3Gr3lRcumPzC931CKvGbghebVu4Lp6YueXWC6RIEX1k=
 github.com/Gaz492/haste v0.0.0-20210704220451-1196552cf55a/go.mod h1:1cWxhgS25ECtSd3HmfuIqpf41C3lh8H7usrsL3NHdbc=
-github.com/MarvinJWendt/testza v0.1.0 h1:4m+JkB/4e0nUlXdIa10Mg0poUz9CanQKjB3L+xecjAo=
 github.com/MarvinJWendt/testza v0.1.0/go.mod h1:7AxNvlfeHP7Z/hDQ5JtE3OKYT3XFUeLCDE2DQninSqs=
 github.com/MarvinJWendt/testza v0.2.1/go.mod h1:God7bhG8n6uQxwdScay+gjm9/LnO4D3kkcZX4hv9Rp8=
 github.com/MarvinJWendt/testza v0.2.8 h1:wADjxMxaIeasMStYq3AFsVyKR0B+1nkFfiRfnz2NEtI=
@@ -27,7 +26,6 @@ github.com/mattn/go-runewidth v0.0.13/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pterm/pterm v0.12.27/go.mod h1:PhQ89w4i95rhgE+xedAoqous6K9X+r6aSOI2eFF7DZI=
-github.com/pterm/pterm v0.12.29 h1:wWRNFkC3+fk/agzHIO4aaXtQuRYdXJKngP3ed+LZlMU=
 github.com/pterm/pterm v0.12.29/go.mod h1:WI3qxgvoQFFGKGjGnJR849gU0TsEOvKn5Q8LlY1U7lg=
 github.com/pterm/pterm v0.12.30/go.mod h1:MOqLIyMOgmTDz9yorcYbcw+HsgoZo3BQfg2wtl3HEFE=
 github.com/pterm/pterm v0.12.31 h1:+UFxhtv9Kuz0nIBH7Aqc2AF0QeOlNChb38L2sYPtXiU=

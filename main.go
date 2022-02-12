@@ -24,14 +24,21 @@ var (
 	logFile *os.File
 	logMw   io.Writer
 	owUID   = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	re      = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp *bool
 )
 
 func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
+	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
 	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
+
+	if *betaApp {
+		owUID = "nelapelmednbnaigieobbdgbinpgcgkfmmdjembg"
+	}
+
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
 	}
@@ -74,7 +81,7 @@ func main() {
 	if located {
 		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
 		// Validate Minecraft bin folder exists
-		checkMinecraftBin()
+		doesBinExist()
 		pterm.DefaultSection.WithLevel(2).Println("App info")
 		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
 		getAppVersion()
@@ -89,7 +96,7 @@ func main() {
 			pterm.Error.Println("Failed to load app settings:\n", err)
 		} else {
 			pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
-			if ftbApp.Settings.Jvmargs != ""{
+			if ftbApp.Settings.Jvmargs != "" {
 				pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
 			}
 
@@ -141,54 +148,65 @@ func main() {
 func uploadFiles() {
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
-	if ftbApp.Structure.MCBin.Exists {
-		if ftbApp.Structure.MCBin.Profile {
-			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
-		}
+	if ftbApp.Structure.Bin.Exists {
+		//if ftbApp.Structure.Bin.Profile {
+		//	uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
+		//}
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
 	}
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
-	if runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
+	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "index.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "chat.html.log"))
+	} else if *betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview")) {
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "index.html.log"))
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "background.html.log"))
+		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "chat.html.log"))
 	}
 }
 
-func checkMinecraftBin() {
+func doesBinExist() {
 	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
-		ftbApp.Structure.MCBin.Exists = true
-		checkFilePathExistsSpinner("Minecraft launcher", path.Join(ftbApp.InstallLocation, "bin", "launcher.exe"))
-		_, err := validateJson("Minecraft launcher profiles", path.Join(ftbApp.InstallLocation, "bin", "launcher_profiles.json"))
-		if err != nil {
-			return
-		}
-		ftbApp.Structure.MCBin.Profile = true
+		ftbApp.Structure.Bin.Exists = true
 	}
 }
 
+//func checkMinecraftBin() {
+//	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
+//	if binExists {
+//		ftbApp.Structure.MCBin.Exists = true
+//		checkFilePathExistsSpinner("Minecraft launcher", path.Join(ftbApp.InstallLocation, "bin", "launcher.exe"))
+//		_, err := validateJson("Minecraft launcher profiles", path.Join(ftbApp.InstallLocation, "bin", "launcher_profiles.json"))
+//		if err != nil {
+//			return
+//		}
+//		ftbApp.Structure.MCBin.Profile = true
+//	}
+//}
+
 func loadAppSettings() error {
-	if ftbApp.Structure.MCBin.Exists {
-		var appSettings  []byte
+	if ftbApp.Structure.Bin.Exists {
+		var appSettings []byte
 		var err error
 		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", path.Join(ftbApp.InstallLocation, "app_settings.json"))
 		if doesAppSettingsExist {
 			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
 			if err != nil {
 				pterm.Error.Println("Error reading app_settings.json:", err)
-                return errors.New("error reading app_settings.json")
-            }
+				return errors.New("error reading app_settings.json")
+			}
 
-		}else {
+		} else {
 			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
-            if err != nil {
-                pterm.Error.Println("Error reading settings.json:", err)
-                return errors.New("error reading settings.json")
-            }
+			if err != nil {
+				pterm.Error.Println("Error reading settings.json:", err)
+				return errors.New("error reading settings.json")
+			}
 		}
 		var i AppSettings
 		if err := json.Unmarshal(appSettings, &i); err != nil {
@@ -203,7 +221,7 @@ func loadAppSettings() error {
 	}
 }
 
-func listInstances(){
+func listInstances() {
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		instances, _ := ioutil.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
@@ -227,7 +245,7 @@ func listInstances(){
 					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
 					pterm.Info.Println("Is Modified:", i.IsModified)
 					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
-					if logFolderExists{
+					if logFolderExists {
 						uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
 					}
 					validUuid := re.Find([]byte(name))
@@ -235,7 +253,7 @@ func listInstances(){
 						pterm.Error.Println(name, " instance name: invalid uuid")
 					}
 					_, err = validateJson(name+" instance.json", path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
-					if err != nil{
+					if err != nil {
 						pterm.Error.Println("instance.json failed to validate")
 					}
 				}

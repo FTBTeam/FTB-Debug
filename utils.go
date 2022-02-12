@@ -214,14 +214,14 @@ func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 	return output, nil
 }
 
-func sanitiseSettings(data []byte) ([]byte, error){
+func sanitiseSettings(data []byte) ([]byte, error) {
 	var i AppSettings
 	if err := json.Unmarshal(data, &i); err != nil {
 		pterm.Error.Println("Error reading app settings:", err)
 		pterm.Debug.Println("JSON data:", string(data))
 		return nil, err
 	}
-	i.SessionString = "<censored>"
+	i.SessionString = "************************"
 	output, err := json.MarshalIndent(i, "", "  ")
 	if err != nil {
 		pterm.Error.Println("Error marshaling json:", err)
