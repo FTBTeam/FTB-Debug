@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package main
@@ -5,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/StackExchange/wmi"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"io/ioutil"
