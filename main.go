@@ -246,6 +246,11 @@ func listInstances() {
 					pterm.Info.Println("Is Modified:", i.IsModified)
 					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 					if logFolderExists {
+						fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", "latest.log"))
+						if err != nil {
+							pterm.Error.Println("Error reading latest.log:", err)
+						}
+						pterm.Info.Println("Latest log timestamp:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
 						uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
 					}
 					validUuid := re.Find([]byte(name))
