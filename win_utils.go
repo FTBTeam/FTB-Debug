@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/StackExchange/wmi"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"io/ioutil"
@@ -41,7 +40,9 @@ func getAppVersion() {
 		v, _ := version.NewVersion(raw)
 		versions[i] = v
 	}
-	sort.Sort(version.Collection(versions))
+	sort.Slice(version.Collection(versions), func(i, j int) bool {
+		return versions[i].GreaterThan(versions[j])
+	})
 	pterm.Debug.Println("Found versions:", versions)
 	ftbApp.AppVersion = versions[0].String()
 
