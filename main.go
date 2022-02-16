@@ -193,19 +193,19 @@ func loadAppSettings() error {
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
-		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", path.Join(ftbApp.InstallLocation, "app_settings.json"))
+		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 		if doesAppSettingsExist {
-			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
-			if err != nil {
-				pterm.Error.Println("Error reading app_settings.json:", err)
-				return errors.New("error reading app_settings.json")
-			}
-
-		} else {
 			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 			if err != nil {
 				pterm.Error.Println("Error reading settings.json:", err)
 				return errors.New("error reading settings.json")
+			}
+
+		} else {
+			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
+			if err != nil {
+				pterm.Error.Println("Error reading app_settings.json:", err)
+				return errors.New("error reading app_settings.json")
 			}
 		}
 		var i AppSettings
