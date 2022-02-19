@@ -61,7 +61,7 @@ build macos-m1:
     GOOS: darwin
     GOARCH: arm64
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-macos
+    - go build -o $CI_PROJECT_DIR/ftb-debug-macos-arm64
   artifacts:
     paths:
       - ftb-debug-macos-arm64
