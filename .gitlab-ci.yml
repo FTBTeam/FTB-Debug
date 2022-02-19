@@ -30,27 +30,38 @@ build linux:
   variables:
     GOOS: linux
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-$GOOS
+    - go build -o $CI_PROJECT_DIR/ftb-debug-linux
   artifacts:
     paths:
-      - ftb-debug-$GOOS
+      - ftb-debug-linux
 
 build windows:
   stage: build
   variables:
     GOOS: windows
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-$GOOS
+    - go build -o $CI_PROJECT_DIR/ftb-debug.exe
   artifacts:
     paths:
-      - ftb-debug-$GOOS
+      - ftb-debug.exe
 
 build macos:
   stage: build
   variables:
     GOOS: darwin
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-$GOOS
+    - go build -o $CI_PROJECT_DIR/ftb-debug-macos
   artifacts:
     paths:
-      - ftb-debug-$GOOS
+      - ftb-debug-macos
+
+build macos-m1:
+  stage: build
+  variables:
+    GOOS: darwin
+    GOARCH: arm64
+  script:
+    - go build -o $CI_PROJECT_DIR/ftb-debug-macos
+  artifacts:
+    paths:
+      - ftb-debug-macos-arm64
