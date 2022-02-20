@@ -8,7 +8,8 @@ require (
 	github.com/gookit/color v1.5.0 // indirect
 	github.com/hashicorp/go-version v1.4.0
 	github.com/layeh/asar v0.0.0-20180124002634-bf07d1986b90
-	github.com/pterm/pterm v0.12.36
+	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
+	github.com/pterm/pterm v0.12.37
 	github.com/shirou/gopsutil/v3 v3.22.1
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2
