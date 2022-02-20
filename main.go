@@ -20,12 +20,13 @@ import (
 )
 
 var (
-	ftbApp  FTBApp
-	logFile *os.File
-	logMw   io.Writer
-	owUID   = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re      = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp *bool
+	ftbApp      FTBApp
+	logFile     *os.File
+	logMw       io.Writer
+	owUID       = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re          = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp     *bool
+	ToolVersion string
 )
 
 func init() {
@@ -54,6 +55,9 @@ func init() {
 }
 
 func main() {
+	if ToolVersion == "" {
+		ToolVersion = "Dev"
+	}
 	defer cleanup(logFile)
 	logMw = io.MultiWriter(os.Stdout, logFile)
 	pterm.SetDefaultOutput(logMw)
@@ -63,7 +67,7 @@ func main() {
 		pterm.NewLettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
 		pterm.NewLettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
 	pterm.DefaultCenter.Println(logo)
-	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s\n%s", "1.0.1", time.Now().UTC().Format(time.RFC1123)))
+	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "1.0.1", ToolVersion, time.Now().UTC().Format(time.RFC1123)))
 	pterm.Debug.Println("Verbose logging enabled")
 
 	pterm.DefaultSection.Println("System Information")

@@ -30,7 +30,7 @@ build linux:
   variables:
     GOOS: linux
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-linux
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-linux
   artifacts:
     paths:
       - ftb-debug-linux
@@ -40,7 +40,7 @@ build windows:
   variables:
     GOOS: windows
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug.exe
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug.exe
   artifacts:
     paths:
       - ftb-debug.exe
@@ -50,7 +50,7 @@ build macos:
   variables:
     GOOS: darwin
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-macos
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-macos
   artifacts:
     paths:
       - ftb-debug-macos
@@ -61,7 +61,7 @@ build macos-m1:
     GOOS: darwin
     GOARCH: arm64
   script:
-    - go build -o $CI_PROJECT_DIR/ftb-debug-macos-arm64
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-macos-arm64
   artifacts:
     paths:
       - ftb-debug-macos-arm64
