@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -20,13 +21,14 @@ import (
 )
 
 var (
-	ftbApp    FTBApp
-	logFile   *os.File
-	logMw     io.Writer
-	owUID     = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re        = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp   *bool
-	GitCommit string
+	ftbApp        FTBApp
+	logFile       *os.File
+	logMw         io.Writer
+	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp       *bool
+	GitCommit     string
+	filesToUpload []FilesToUploadStruct
 )
 
 func init() {
@@ -153,12 +155,13 @@ func uploadFiles() {
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
 	if ftbApp.Structure.Bin.Exists {
-		//if ftbApp.Structure.Bin.Profile {
-		//	uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_profiles.json"))
-		//}
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
+	}
+	for _, file := range filesToUpload {
+		pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
+		newUploadFile(file.Path, file.File.Name())
 	}
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
 	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
@@ -248,14 +251,42 @@ func listInstances() {
 					pterm.Info.Println("Custom Args:", i.JvmArgs)
 					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
 					pterm.Info.Println("Is Modified:", i.IsModified)
+
+					baseFiles, err := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation, name))
+					for _, baseFile := range baseFiles {
+						if strings.HasPrefix(baseFile.Name(), "hs_err_") {
+							pterm.Debug.Println("Found java segfault log:", baseFile.Name())
+							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: baseFile, Path: path.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
+							//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, baseFile.Name()))
+						}
+					}
+
 					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 					if logFolderExists {
-						fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", "latest.log"))
+						files, err := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						if err != nil {
-							pterm.Error.Println("Error reading latest.log:", err)
+							pterm.Error.Println("Error getting file list at:", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+						} else {
+							for _, file := range files {
+								if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" {
+									pterm.Debug.Println("Found log file:", file.Name())
+									fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
+									if err != nil {
+										pterm.Error.Println("Error getting file info:", err)
+									}
+									//pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
+									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
+									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: file, Path: path.Join(ftbApp.Settings.InstanceLocation, name, file.Name())})
+									//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", file.Name()))
+								}
+							}
 						}
-						pterm.Info.Println("Latest log timestamp:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
-						uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
+						//fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", "latest.log"))
+						//if err != nil {
+						//	pterm.Error.Println("Error reading latest.log:", err)
+						//}
+						//pterm.Info.Println("Latest log timestamp:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
+						//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
 					}
 					validUuid := re.Find([]byte(name))
 					if validUuid == nil {

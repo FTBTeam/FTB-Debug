@@ -114,6 +114,38 @@ func checkFilePath(filePath string) (string, bool) {
 	}
 }
 
+func newUploadFile(filePath string, fileName string) {
+	data, err := os.ReadFile(filePath)
+	if fileName == "launcher_profiles.json" {
+		data, err = sanitiseProfile(data)
+		if err != nil {
+			pterm.Warning.Println("Error sanitising launcher_profiles.json")
+			return
+		}
+	}
+	if fileName == "settings.json" {
+		data, err = sanitiseSettings(data)
+		if err != nil {
+			pterm.Warning.Println("Error sanitising settings.json")
+			return
+		}
+	}
+	if err != nil {
+		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file", fileName))
+	} else {
+		resp, err := hasteClient.UploadBytes(data)
+		if err != nil {
+			pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to upload - %s", fileName, err.Error()))
+			if err.Error() == "file too large" {
+				pterm.Info.Println("Trying again with transfer.sh")
+				uploadBigFile(filePath, fileName)
+			}
+		} else {
+			pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", fileName, resp.GetLink(hasteClient)))
+		}
+	}
+}
+
 func uploadFile(filePath string, name string) {
 	data, err := ioutil.ReadFile(path.Join(filePath, name))
 	if name == "bin/launcher_profiles.json" {
@@ -142,6 +174,31 @@ func uploadFile(filePath string, name string) {
 			pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name, resp.GetLink(hasteClient)))
 		}
 	}
+}
+
+func newUploadBigFile(filePath string, fileName string) {
+	req, err := newfileUploadRequest(filePath)
+	if err != nil {
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
+		pterm.Error.Println(err)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
+		pterm.Error.Println(err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
+		pterm.Error.Println(err)
+	} else {
+		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", fileName, strings.TrimSuffix(string(body), "\n")))
+	}
+
 }
 
 func uploadBigFile(filePath string, name string) {

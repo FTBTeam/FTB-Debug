@@ -1,6 +1,9 @@
 package main
 
-import "os/user"
+import (
+	"os"
+	"os/user"
+)
 
 type (
 	FTBApp struct {
@@ -87,5 +90,10 @@ type (
 		JarVersion string `json:"jarVersion"`
 		WebVersion string `json:"webVersion"`
 		Branch     string `json:"branch"`
+	}
+
+	FilesToUploadStruct struct {
+		File os.DirEntry
+		Path string
 	}
 )
