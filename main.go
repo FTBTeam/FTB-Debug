@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"github.com/Gaz492/haste"
 	"github.com/eiannone/keyboard"
+	"github.com/getsentry/sentry-go"
 	"github.com/pterm/pterm"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -60,6 +62,23 @@ func main() {
 	if GitCommit == "" {
 		GitCommit = "Dev"
 	}
+
+	err := sentry.Init(sentry.ClientOptions{
+		// Either set your DSN here or set the SENTRY_DSN environment variable.
+		Dsn: "https://50d1f640c19c4a4d84297643f695d5a7@sentry.creeperhost.net/11",
+		// Either set environment and release here or set the SENTRY_ENVIRONMENT
+		// and SENTRY_RELEASE environment variables.
+		Environment: "",
+		Release:     fmt.Sprintf("ftb-debug-%s", GitCommit),
+		// Enable printing of SDK debug messages.
+		// Useful when getting started or trying to figure something out.
+		Debug: false,
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+
+	defer sentry.Flush(2 * time.Second)
 	defer cleanup(logFile)
 	logMw = io.MultiWriter(os.Stdout, logFile)
 	pterm.SetDefaultOutput(logMw)
@@ -78,6 +97,7 @@ func main() {
 	pterm.DefaultSection.Println("FTB App Checks")
 	usr, err := user.Current()
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Failed to get users home directory")
 	}
 	ftbApp.User = usr
@@ -99,6 +119,7 @@ func main() {
 		//TODO Add instance checking and settings file validation
 		err := loadAppSettings()
 		if err != nil {
+			sentry.CaptureException(err)
 			pterm.Error.Println("Failed to load app settings:\n", err)
 		} else {
 			pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
@@ -120,11 +141,13 @@ func main() {
 
 	tUpload, err := ioutil.ReadFile(logFile.Name())
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Failed to upload support file...")
 		pterm.Error.Println(err)
 	} else {
 		resp, err := hasteClient.UploadBytes(tUpload)
 		if err != nil {
+			sentry.CaptureException(err)
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
@@ -158,6 +181,7 @@ func uploadFiles() {
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
 		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
+		uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
 	}
 	for _, file := range filesToUpload {
 		pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
@@ -204,6 +228,7 @@ func loadAppSettings() error {
 		if doesAppSettingsExist {
 			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 			if err != nil {
+				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading settings.json:", err)
 				return errors.New("error reading settings.json")
 			}
@@ -211,12 +236,14 @@ func loadAppSettings() error {
 		} else {
 			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
 			if err != nil {
+				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading app_settings.json:", err)
 				return errors.New("error reading app_settings.json")
 			}
 		}
 		var i AppSettings
 		if err := json.Unmarshal(appSettings, &i); err != nil {
+			sentry.CaptureException(err)
 			pterm.Error.Println("Error reading app settings:", err)
 			pterm.Debug.Println("JSON data:", string(appSettings))
 			return err
@@ -240,6 +267,7 @@ func listInstances() {
 					var i Instance
 					data, err := ioutil.ReadFile(path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
+						sentry.CaptureException(err)
 						pterm.Error.Println("Error reading instance.json:", err)
 						pterm.Debug.Println("JSON data:", string(data))
 					}
@@ -265,6 +293,7 @@ func listInstances() {
 					if logFolderExists {
 						files, err := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						if err != nil {
+							sentry.CaptureException(err)
 							pterm.Error.Println("Error getting file list at:", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						} else {
 							for _, file := range files {
@@ -272,6 +301,7 @@ func listInstances() {
 									pterm.Debug.Println("Found log file:", file.Name())
 									fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
 									if err != nil {
+										sentry.CaptureException(err)
 										pterm.Error.Println("Error getting file info:", err)
 									}
 									//pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
@@ -294,6 +324,7 @@ func listInstances() {
 					}
 					_, err = validateJson(name+" instance.json", path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
+						sentry.CaptureException(err)
 						pterm.Error.Println("instance.json failed to validate")
 					}
 				}

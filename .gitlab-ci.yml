@@ -45,6 +45,18 @@ build windows:
     paths:
       - ftb-debug.exe
 
+build windowsArm:
+  stage: build
+  variables:
+    GOOS: windows
+    GOARCH: arm64
+  script:
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-arm64.exe
+  artifacts:
+    paths:
+      - ftb-debug-arm64.exe
+
+
 build macos:
   stage: build
   variables:

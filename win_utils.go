@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"github.com/yusufpapurcu/wmi"
@@ -29,6 +30,7 @@ func getAppVersion() {
 	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)
 	files, err := ioutil.ReadDir(overwolfDIR)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error while reading Overwolf versions")
 		return
 	}
@@ -51,6 +53,7 @@ func getAppVersion() {
 	jsonFile, err := os.Open(path.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
 	// if we os.Open returns an error then handle it
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error opening version.json:", err)
 	}
 	defer jsonFile.Close()

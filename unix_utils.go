@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package main
@@ -6,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/layeh/asar"
 	"github.com/pterm/pterm"
 	"os"
@@ -65,6 +67,7 @@ func locateApp() bool {
 			return false
 		}
 	} else {
+		sentry.CaptureException(errors.New("Unable to determine OS"))
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
 		return false
 	}
@@ -89,6 +92,7 @@ func getAppVersion() {
 	} else if runtime.GOOS == "linux" {
 		appPath = path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
 	} else {
+		sentry.CaptureException(errors.New("unable to determine OS"))
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
 		ftbApp.JarVersion = "N/A"
 		ftbApp.WebVersion = "N/A"
@@ -97,6 +101,7 @@ func getAppVersion() {
 	}
 	f, err := os.Open(appPath)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(err)
 		return
 	}
@@ -104,6 +109,7 @@ func getAppVersion() {
 
 	archive, err := asar.Decode(f)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(err)
 		return
 	}
@@ -116,6 +122,7 @@ func getAppVersion() {
 	var versionJson VersionJson
 	err = json.Unmarshal(versionRaw.Bytes(), &versionJson)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("JSON unmarshal error")
 		return
 	}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Gaz492/haste"
+	"github.com/getsentry/sentry-go"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -51,6 +52,7 @@ func validateJson(message string, filePath string) (bool, error) {
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
 		if err != nil {
+			sentry.CaptureException(err)
 			pterm.Error.Println(message, ": failed to load file\n", err)
 			return false, err
 		}
@@ -59,6 +61,7 @@ func validateJson(message string, filePath string) (bool, error) {
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 		valid := json.Valid(byteValue)
 		if !valid {
+			sentry.CaptureException(err)
 			pterm.Error.Println(fmt.Sprintf("%s: is invalid", message))
 			return false, err
 		}
@@ -179,6 +182,7 @@ func uploadFile(filePath string, name string) {
 func newUploadBigFile(filePath string, fileName string) {
 	req, err := newfileUploadRequest(filePath)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
 		pterm.Error.Println(err)
 	}
@@ -186,6 +190,7 @@ func newUploadBigFile(filePath string, fileName string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
 		pterm.Error.Println(err)
 	}
@@ -193,6 +198,7 @@ func newUploadBigFile(filePath string, fileName string) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
 		pterm.Error.Println(err)
 	} else {
@@ -204,6 +210,7 @@ func newUploadBigFile(filePath string, fileName string) {
 func uploadBigFile(filePath string, name string) {
 	req, err := newfileUploadRequest(path.Join(filePath, name))
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	}
@@ -211,6 +218,7 @@ func uploadBigFile(filePath string, name string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	}
@@ -218,6 +226,7 @@ func uploadBigFile(filePath string, name string) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
 		pterm.Error.Println(err)
 	} else {
@@ -254,6 +263,7 @@ func newfileUploadRequest(path string) (*http.Request, error) {
 func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 	var i interface{}
 	if err = json.Unmarshal(data, &i); err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error reading launcher profile:", err)
 		pterm.Debug.Println("JSON data:", string(data))
 		return nil, err
@@ -264,6 +274,7 @@ func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 	}
 	output, err := json.MarshalIndent(i, "", "  ")
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error marshaling json:", err)
 		return nil, err
 	}
@@ -274,6 +285,7 @@ func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 func sanitiseSettings(data []byte) ([]byte, error) {
 	var i AppSettings
 	if err := json.Unmarshal(data, &i); err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error reading app settings:", err)
 		pterm.Debug.Println("JSON data:", string(data))
 		return nil, err
@@ -281,6 +293,7 @@ func sanitiseSettings(data []byte) ([]byte, error) {
 	i.SessionString = "************************"
 	output, err := json.MarshalIndent(i, "", "  ")
 	if err != nil {
+		sentry.CaptureException(err)
 		pterm.Error.Println("Error marshaling json:", err)
 		return nil, err
 	}
