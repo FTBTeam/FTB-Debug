@@ -1,6 +1,6 @@
 module ftb-debug/v2
 
-go 1.16
+go 1.17
 
 require (
 	github.com/Gaz492/haste v0.0.0-20210704220451-1196552cf55a

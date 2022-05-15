@@ -4,7 +4,7 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml
 
-image: golang:1.16-alpine
+image: golang:1.17-alpine
 
 variables:
   # Please edit to your GitLab project
