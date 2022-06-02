@@ -80,7 +80,7 @@ build macos:
     FILE_OUTPUT: macos
 
 build macos-m1:
-  stage: build
+  extends: .build
   variables:
     GOOS: darwin
     GOARCH: arm64
