@@ -25,55 +25,63 @@ stages:
   - build
   - deploy
 
+.build:
+  script:
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+  artifacts:
+    paths:
+      - ftb-debug-$FILE_OUTPUT
+
 build linux:
-  stage: build
+  extends: .build
   variables:
     GOOS: linux
-  script:
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-linux
-  artifacts:
-    paths:
-      - ftb-debug-linux
+    FILE_OUTPUT: linux
+
+build linuxArm:
+  extends: .build
+  variables:
+    GOOS: linux
+    GOARCH: arm64
+    FILE_OUTPUT: linux-arm
+
+build linuxStatic:
+  extends: .build
+  variables:
+    GOOS: linux
+    FILE_OUTPUT: linux-static
+    EXTRA_FLAGS: -extldflags=-static
+
+build linuxStaticArm:
+  extends: .build
+  variables:
+    GOOS: linux
+    GOARCH: arm64
+    FILE_OUTPUT: linux-static-arm
+    EXTRA_FLAGS: -extldflags=-static
 
 build windows:
-  stage: build
+  extends: .build
   variables:
     GOOS: windows
-  script:
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug.exe
-  artifacts:
-    paths:
-      - ftb-debug.exe
+    FILE_OUTPUT: .exe
 
 build windowsArm:
-  stage: build
+  extends: .build
   variables:
     GOOS: windows
     GOARCH: arm64
-  script:
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-arm64.exe
-  artifacts:
-    paths:
-      - ftb-debug-arm64.exe
-
+    FILE_OUTPUT: arm64.exe
 
 build macos:
-  stage: build
+  extends: .build
   variables:
     GOOS: darwin
-  script:
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-macos
-  artifacts:
-    paths:
-      - ftb-debug-macos
+    FILE_OUTPUT: macos
 
 build macos-m1:
   stage: build
   variables:
     GOOS: darwin
     GOARCH: arm64
-  script:
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -o $CI_PROJECT_DIR/ftb-debug-macos-arm64
-  artifacts:
-    paths:
-      - ftb-debug-macos-arm64
+    FILE_OUTPUT: macos-arm64
