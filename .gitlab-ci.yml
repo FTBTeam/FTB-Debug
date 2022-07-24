@@ -38,6 +38,7 @@ build linux:
   variables:
     GOOS: linux
     FILE_OUTPUT: linux
+    EXTRA_FLAGS: -extldflags=-static
 
 build linuxArm:
   extends: .build
@@ -45,20 +46,6 @@ build linuxArm:
     GOOS: linux
     GOARCH: arm64
     FILE_OUTPUT: linux-arm
-
-build linuxStatic:
-  extends: .build
-  variables:
-    GOOS: linux
-    FILE_OUTPUT: linux-static
-    EXTRA_FLAGS: -extldflags=-static
-
-build linuxStaticArm:
-  extends: .build
-  variables:
-    GOOS: linux
-    GOARCH: arm64
-    FILE_OUTPUT: linux-static-arm
     EXTRA_FLAGS: -extldflags=-static
 
 build windows:
