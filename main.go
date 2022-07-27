@@ -142,7 +142,7 @@ func main() {
 	tUpload, err := ioutil.ReadFile(logFile.Name())
 	if err != nil {
 		sentry.CaptureException(err)
-		pterm.Error.Println("Failed to upload support file...")
+		pterm.Error.Println("Failed to upload log file", logFile.Name())
 		pterm.Error.Println(err)
 	} else {
 		resp, err := hasteClient.UploadBytes(tUpload)
