@@ -28,7 +28,7 @@ stages:
 .build:
   stage: build
   script:
-    - go build -ldflags="-X main.GitCommit=$CI_COMMIT_SHORT_SHA" -ldflags=$EXTRA_FLAGS  -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+    - go build -ldflags="-X main.GitCommit=$CI_COMMIT_SHORT_SHA -linkmode external -extldflags "-static""  -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
   artifacts:
     paths:
       - ftb-debug-$FILE_OUTPUT
