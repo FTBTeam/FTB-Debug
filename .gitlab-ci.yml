@@ -33,6 +33,7 @@ stages:
   artifacts:
     paths:
       - ftb-debug-$FILE_OUTPUT
+    expire_in: 1 day
 
 build linux:
   extends: .build
