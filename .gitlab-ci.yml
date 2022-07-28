@@ -28,7 +28,7 @@ stages:
 .build:
   stage: build
   script:
-    - echo "-ldflags \"-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA'\" $EXTRA_FLAGS"
+    - echo "-ldflags \"-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS\""
     - go build -ldflags "-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
   artifacts:
     paths:
@@ -39,7 +39,7 @@ build linux:
   variables:
     GOOS: linux
     FILE_OUTPUT: linux
-    EXTRA_FLAGS: "-extldflags '-v -static'"
+    EXTRA_FLAGS: "-extldflags -v"
 
 build linuxArm:
   extends: .build
@@ -47,7 +47,7 @@ build linuxArm:
     GOOS: linux
     GOARCH: arm64
     FILE_OUTPUT: linux-arm
-    EXTRA_FLAGS: "-extldflags '-v -static'"
+    EXTRA_FLAGS: "-extldflags -v"
 
 build windows:
   extends: .build
