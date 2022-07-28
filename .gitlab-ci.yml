@@ -47,7 +47,7 @@ build linuxArm:
     GOOS: linux
     GOARCH: arm64
     FILE_OUTPUT: linux-arm
-    EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
+    # EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
 
 build windows:
   extends: .build
