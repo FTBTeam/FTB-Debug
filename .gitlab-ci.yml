@@ -29,7 +29,7 @@ stages:
   stage: build
   script:
     - echo $EXTRA_FLAGS
-    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+    - go build -ldflags "-X main.GitCommit=$CI_COMMIT_SHORT_SHA" $EXTRA_FLAGS -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
   artifacts:
     paths:
       - ftb-debug-$FILE_OUTPUT
