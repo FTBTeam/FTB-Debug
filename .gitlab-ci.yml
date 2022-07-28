@@ -4,7 +4,7 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml
 
-image: golang:1.17-alpine
+image: golang:1.18
 
 variables:
   # Please edit to your GitLab project
@@ -28,8 +28,8 @@ stages:
 .build:
   stage: build
   script:
-    - echo "-ldflags '"-X main.GitCommit=$CI_COMMIT_SHORT_SHA" $EXTRA_FLAGS' -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT"
-    - go build -ldflags '"-X main.GitCommit=$CI_COMMIT_SHORT_SHA" $EXTRA_FLAGS'  -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+    - echo "-ldflags '-X main.GitCommit=$CI_COMMIT_SHORT_SHA $EXTRA_FLAGS' -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT"
+    - go build -ldflags '-X main.GitCommit=$CI_COMMIT_SHORT_SHA $EXTRA_FLAGS'  -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
   artifacts:
     paths:
       - ftb-debug-$FILE_OUTPUT
