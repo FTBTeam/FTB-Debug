@@ -29,7 +29,7 @@ stages:
   stage: build
   script:
     - echo "-ldflags \"-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS\""
-    - go build -ldflags "-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+    - go build -ldflags "-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug$FILE_OUTPUT
   artifacts:
     paths:
       - ftb-debug-$FILE_OUTPUT
@@ -40,7 +40,7 @@ build linux:
   variables:
     CGO_ENABLED: 0
     GOOS: linux
-    FILE_OUTPUT: linux
+    FILE_OUTPUT: "-linux"
     EXTRA_FLAGS: "-extldflags '-static'"
 
 build linuxArm:
@@ -49,7 +49,7 @@ build linuxArm:
     CGO_ENABLED: 0
     GOOS: linux
     GOARCH: arm64
-    FILE_OUTPUT: linux-arm
+    FILE_OUTPUT: "-linux-arm"
     # EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
 
 build windows:
@@ -57,7 +57,7 @@ build windows:
   variables:
     CGO_ENABLED: 0
     GOOS: windows
-    FILE_OUTPUT: .exe
+    FILE_OUTPUT: ".exe"
 
 build windowsArm:
   extends: .build
@@ -65,14 +65,14 @@ build windowsArm:
     CGO_ENABLED: 0
     GOOS: windows
     GOARCH: arm64
-    FILE_OUTPUT: arm64.exe
+    FILE_OUTPUT: "-arm64.exe"
 
 build macos:
   extends: .build
   variables:
     CGO_ENABLED: 0
     GOOS: darwin
-    FILE_OUTPUT: macos
+    FILE_OUTPUT: "macos"
 
 build macos-m1:
   extends: .build
@@ -80,4 +80,4 @@ build macos-m1:
     CGO_ENABLED: 0
     GOOS: darwin
     GOARCH: arm64
-    FILE_OUTPUT: macos-arm64
+    FILE_OUTPUT: "macos-arm64"
