@@ -41,7 +41,7 @@ build linux:
     CGO_ENABLED: 0
     GOOS: linux
     FILE_OUTPUT: linux
-    EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
+    EXTRA_FLAGS: "-extldflags '-static'"
 
 build linuxArm:
   extends: .build
