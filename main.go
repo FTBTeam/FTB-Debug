@@ -31,6 +31,7 @@ var (
 	betaApp       *bool
 	GitCommit     string
 	filesToUpload []FilesToUploadStruct
+	appLocated    bool
 )
 
 func init() {
@@ -103,8 +104,8 @@ func main() {
 	ftbApp.User = usr
 
 	//App checks here
-	located := locateApp()
-	if located {
+	appLocated = locateApp()
+	if appLocated {
 		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
 		// Validate Minecraft bin folder exists
 		doesBinExist()
@@ -131,11 +132,11 @@ func main() {
 
 		pterm.DefaultSection.Println("Check for instances")
 		listInstances()
-
-		// Upload info and logs
-		pterm.DefaultSection.Println("Upload logs")
-		uploadFiles()
 	}
+
+	// Upload info and logs
+	pterm.DefaultSection.Println("Upload logs")
+	uploadFiles()
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 
@@ -177,18 +178,22 @@ func main() {
 func uploadFiles() {
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
-	if ftbApp.Structure.Bin.Exists {
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
+
+	if appLocated {
+		if ftbApp.Structure.Bin.Exists {
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
+		}
+		for _, file := range filesToUpload {
+			pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
+			newUploadFile(file.Path, file.File.Name())
+		}
+		uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
+		uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
 	}
-	for _, file := range filesToUpload {
-		pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
-		newUploadFile(file.Path, file.File.Name())
-	}
-	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
-	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
+
 	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "index.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
