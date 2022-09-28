@@ -94,7 +94,6 @@ package:
     - build_windowsArm
     - build_macos
     - build_macos-m1
-    - build_darwin_arm64
   artifacts:
     name: all-artifacts
     untracked: true
