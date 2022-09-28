@@ -23,14 +23,24 @@ import (
 )
 
 var (
-	ftbApp        FTBApp
-	logFile       *os.File
-	logMw         io.Writer
-	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp       *bool
-	GitCommit     string
-	filesToUpload []FilesToUploadStruct
+	ftbApp            FTBApp
+	logFile           *os.File
+	logMw             io.Writer
+	owUID             = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re                = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp           *bool
+	GitCommit         string
+	filesToUpload     []FilesToUploadStruct
+	appLocated        bool
+	checkRequestsURLs = []string{
+		"https://api.modpacks.ch/public/modpack/99",
+		"https://google.com",
+		"https://api.creeper.host/api/health",
+		"https://maven.creeperhost.net",
+		"https://maven.fabricmc.net",
+		"https://meta.fabricmc.net",
+		"https://maven.minecraftforge.net/",
+	}
 )
 
 func init() {
@@ -103,8 +113,8 @@ func main() {
 	ftbApp.User = usr
 
 	//App checks here
-	located := locateApp()
-	if located {
+	appLocated = locateApp()
+	if appLocated {
 		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
 		// Validate Minecraft bin folder exists
 		doesBinExist()
@@ -129,13 +139,23 @@ func main() {
 
 		}
 
+		pterm.DefaultSection.Println("Network requests checks")
+		for _, url := range checkRequestsURLs {
+			success, msg := requestChecks(url)
+			if success {
+				pterm.Success.Printfln("%s returned a successful response: %s", url, msg)
+			} else {
+				pterm.Warning.Printfln("%s failed or returned non 200 status: %s", url, msg)
+			}
+		}
+
 		pterm.DefaultSection.Println("Check for instances")
 		listInstances()
-
-		// Upload info and logs
-		pterm.DefaultSection.Println("Upload logs")
-		uploadFiles()
 	}
+
+	// Upload info and logs
+	pterm.DefaultSection.Println("Upload logs")
+	uploadFiles()
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 
@@ -177,18 +197,22 @@ func main() {
 func uploadFiles() {
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
-	if ftbApp.Structure.Bin.Exists {
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
-		uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
+
+	if appLocated {
+		if ftbApp.Structure.Bin.Exists {
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
+			uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
+		}
+		for _, file := range filesToUpload {
+			pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
+			newUploadFile(file.Path, file.File.Name())
+		}
+		uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
+		uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
 	}
-	for _, file := range filesToUpload {
-		pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
-		newUploadFile(file.Path, file.File.Name())
-	}
-	uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
-	uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
+
 	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "index.html.log"))
 		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))

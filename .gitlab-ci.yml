@@ -24,54 +24,77 @@ before_script:
 stages:
   - build
   - deploy
+  - package
 
 .build:
   stage: build
   script:
-    - echo "-ldflags \"-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS\""
-    - go build -ldflags "-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug-$FILE_OUTPUT
+    - go build -ldflags "-X 'main.GitCommit=$CI_COMMIT_SHORT_SHA' $EXTRA_FLAGS" -o $CI_PROJECT_DIR/ftb-debug$FILE_OUTPUT
   artifacts:
     paths:
-      - ftb-debug-$FILE_OUTPUT
+      - ftb-debug$FILE_OUTPUT
     expire_in: 1 day
 
-build linux:
+build_linux:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: linux
-    FILE_OUTPUT: linux
-    EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
+    FILE_OUTPUT: "-linux"
+    EXTRA_FLAGS: "-extldflags '-static'"
 
-build linuxArm:
+build_linuxArm:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: linux
     GOARCH: arm64
-    FILE_OUTPUT: linux-arm
+    FILE_OUTPUT: "-linux-arm"
     # EXTRA_FLAGS: "-linkmode external -extldflags '-static'"
 
-build windows:
+build_windows:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: windows
-    FILE_OUTPUT: .exe
+    FILE_OUTPUT: ".exe"
 
-build windowsArm:
+build_windowsArm:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: windows
     GOARCH: arm64
-    FILE_OUTPUT: arm64.exe
+    FILE_OUTPUT: "-arm64.exe"
 
-build macos:
+build_macos:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: darwin
-    FILE_OUTPUT: macos
+    FILE_OUTPUT: "macos"
 
-build macos-m1:
+build_macos-m1:
   extends: .build
   variables:
+    CGO_ENABLED: 0
     GOOS: darwin
     GOARCH: arm64
-    FILE_OUTPUT: macos-arm64
+    FILE_OUTPUT: "macos-arm64"
+
+package:
+  stage: package
+  script:
+    - echo "packaging everything here"
+  #    - chmod +x upx.sh && ./upx.sh
+  needs:
+    - build_linux
+    - build_linuxArm
+    - build_windows
+    - build_windowsArm
+    - build_macos
+    - build_macos-m1
+  artifacts:
+    name: all-artifacts
+    untracked: true
+    expire_in: 1 week
