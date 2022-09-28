@@ -300,3 +300,14 @@ func sanitiseSettings(data []byte) ([]byte, error) {
 	//pterm.Debug.Println(string(output))
 	return output, nil
 }
+
+func requestChecks(url string) (bool, string) {
+	req, err := http.Head(url)
+	if err != nil {
+		return false, err.Error()
+	}
+	if req.StatusCode != http.StatusOK {
+		return false, fmt.Sprintf("Request returned non 200 status: %d (%s)", req.StatusCode, req.Status)
+	}
+	return true, fmt.Sprintf("Request Successful, %s", req.Status)
+}

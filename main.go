@@ -23,15 +23,24 @@ import (
 )
 
 var (
-	ftbApp        FTBApp
-	logFile       *os.File
-	logMw         io.Writer
-	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp       *bool
-	GitCommit     string
-	filesToUpload []FilesToUploadStruct
-	appLocated    bool
+	ftbApp            FTBApp
+	logFile           *os.File
+	logMw             io.Writer
+	owUID             = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re                = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp           *bool
+	GitCommit         string
+	filesToUpload     []FilesToUploadStruct
+	appLocated        bool
+	checkRequestsURLs = []string{
+		"https://api.modpacks.ch/public/modpack/99",
+		"https://google.com",
+		"https://api.creeper.host/api/health",
+		"https://maven.creeperhost.net",
+		"https://maven.fabricmc.net",
+		"https://meta.fabricmc.net",
+		"https://maven.minecraftforge.net/",
+	}
 )
 
 func init() {
@@ -128,6 +137,16 @@ func main() {
 				pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
 			}
 
+		}
+
+		pterm.DefaultSection.Println("Network requests checks")
+		for _, url := range checkRequestsURLs {
+			success, msg := requestChecks(url)
+			if success {
+				pterm.Success.Printfln("%s returned a successful response: %s", url, msg)
+			} else {
+				pterm.Warning.Printfln("%s failed or returned non 200 status: %s", url, msg)
+			}
 		}
 
 		pterm.DefaultSection.Println("Check for instances")
