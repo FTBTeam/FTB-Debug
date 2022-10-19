@@ -96,4 +96,11 @@ type (
 		File os.DirEntry
 		Path string
 	}
+
+	CheckURLStruct struct {
+		method             string
+		validateResponse   bool
+		expectedStatusCode int
+		expectedReponse    string
+	}
 )
