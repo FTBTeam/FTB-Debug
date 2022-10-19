@@ -130,3 +130,21 @@ func getAppVersion() {
 	ftbApp.WebVersion = versionJson.WebVersion
 	ftbApp.AppBranch = versionJson.Branch
 }
+
+func getFTBProcess() {
+	processes, err := process.Processes()
+	if err != nil {
+		pterm.Error.Println("Error getting processes\n", err)
+		return
+	}
+
+	for _, p := range processes {
+		n, err := p.Name()
+		if err != nil {
+			pterm.Warning.Println("Error getting process name\n", err)
+		}
+		if n != "" && strings.ToLower(n) == "overwolf.exe" {
+			p.Kill()
+		}
+	}
+}

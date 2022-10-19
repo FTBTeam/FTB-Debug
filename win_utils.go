@@ -9,11 +9,13 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
+	"github.com/shirou/gopsutil/v3/process"
 	"github.com/yusufpapurcu/wmi"
 	"io/ioutil"
 	"os"
 	"path"
 	"sort"
+	"strings"
 )
 
 type (
@@ -23,7 +25,7 @@ type (
 	}
 )
 
-//TODO implement getting app version from overwolf
+// TODO implement getting app version from overwolf
 func getAppVersion() {
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
@@ -87,5 +89,23 @@ func locateApp() bool {
 	} else {
 		pterm.Error.Println("Unable to find app install")
 		return false
+	}
+}
+
+func getFTBProcess() {
+	processes, err := process.Processes()
+	if err != nil {
+		pterm.Error.Println("Error getting processes\n", err)
+		return
+	}
+
+	for _, p := range processes {
+		n, err := p.Name()
+		if err != nil {
+			pterm.Warning.Println("Error getting process name\n", err)
+		}
+		if n != "" && strings.ToLower(n) == "overwolf.exe" {
+			p.Kill()
+		}
 	}
 }

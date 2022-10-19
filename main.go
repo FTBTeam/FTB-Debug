@@ -96,6 +96,9 @@ func main() {
 	pterm.DefaultSection.Println("System Information")
 	getOSInfo()
 
+	pterm.Info.Println("Killing Overwolf")
+	getFTBProcess()
+
 	pterm.DefaultSection.Println("FTB App Checks")
 	usr, err := user.Current()
 	if err != nil {
