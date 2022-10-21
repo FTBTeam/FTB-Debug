@@ -96,7 +96,7 @@ func main() {
 	pterm.DefaultSection.Println("System Information")
 	getOSInfo()
 
-	pterm.Info.Println("Killing Overwolf")
+	pterm.Info.Println("Killing FTB App")
 	getFTBProcess()
 
 	pterm.DefaultSection.Println("FTB App Checks")

@@ -10,11 +10,13 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/layeh/asar"
 	"github.com/pterm/pterm"
+	"github.com/shirou/gopsutil/v3/process"
 	"os"
 	"os/exec"
 	"path"
 	"regexp"
 	"runtime"
+	"strings"
 )
 
 func getSysInfo() (oSystem string, err error) {
@@ -143,7 +145,7 @@ func getFTBProcess() {
 		if err != nil {
 			pterm.Warning.Println("Error getting process name\n", err)
 		}
-		if n != "" && strings.ToLower(n) == "overwolf.exe" {
+		if n != "" && strings.ToLower(n) == "ftb-app" {
 			p.Kill()
 		}
 	}
