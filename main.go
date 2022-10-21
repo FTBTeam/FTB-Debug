@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/user"
 	"path"
@@ -23,24 +24,15 @@ import (
 )
 
 var (
-	ftbApp            FTBApp
-	logFile           *os.File
-	logMw             io.Writer
-	owUID             = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re                = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp           *bool
-	GitCommit         string
-	filesToUpload     []FilesToUploadStruct
-	appLocated        bool
-	checkRequestsURLs = []string{
-		"https://api.modpacks.ch/public/modpack/99",
-		"https://google.com",
-		"https://api.creeper.host/api/health",
-		"https://maven.creeperhost.net",
-		"https://maven.fabricmc.net",
-		"https://meta.fabricmc.net",
-		"https://maven.minecraftforge.net/",
-	}
+	ftbApp        FTBApp
+	logFile       *os.File
+	logMw         io.Writer
+	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	betaApp       *bool
+	GitCommit     string
+	filesToUpload []FilesToUploadStruct
+	appLocated    bool
 )
 
 func init() {
@@ -104,6 +96,9 @@ func main() {
 	pterm.DefaultSection.Println("System Information")
 	getOSInfo()
 
+	pterm.Info.Println("Killing FTB App")
+	getFTBProcess()
+
 	pterm.DefaultSection.Println("FTB App Checks")
 	usr, err := user.Current()
 	if err != nil {
@@ -111,6 +106,37 @@ func main() {
 		pterm.Error.Println("Failed to get users home directory")
 	}
 	ftbApp.User = usr
+
+	pterm.DefaultSection.Println("Network requests checks")
+	for url, checks := range checkRequestsURLs {
+		client := &http.Client{}
+		req, err := http.NewRequest(checks.method, url, nil)
+		if err != nil {
+			pterm.Error.Println("Error creating request to %s\n%s", url, err.Error())
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			pterm.Error.Println("Error making request to %s\n%s", url, err.Error())
+		}
+
+		// DO checks
+		if resp.StatusCode != checks.expectedStatusCode {
+			pterm.Warning.Printfln("%s returned unexpected status code, expected %d got %d (%s)", url, checks.expectedStatusCode, resp.StatusCode, resp.Status)
+			continue
+		}
+		if checks.validateResponse {
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				pterm.Error.Println("Error reading response body\n", err)
+				continue
+			}
+			if string(body) != checks.expectedReponse {
+				pterm.Warning.Printfln("%s did not match expected response\n%s", url, string(body))
+				continue
+			}
+		}
+		pterm.Success.Printfln("%s returned expected results", url)
+	}
 
 	//App checks here
 	appLocated = locateApp()
@@ -137,16 +163,6 @@ func main() {
 				pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
 			}
 
-		}
-
-		pterm.DefaultSection.Println("Network requests checks")
-		for _, url := range checkRequestsURLs {
-			success, msg := requestChecks(url)
-			if success {
-				pterm.Success.Printfln("%s returned a successful response: %s", url, msg)
-			} else {
-				pterm.Warning.Printfln("%s failed or returned non 200 status: %s", url, msg)
-			}
 		}
 
 		pterm.DefaultSection.Println("Check for instances")

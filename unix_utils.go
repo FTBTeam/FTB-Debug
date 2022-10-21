@@ -10,11 +10,13 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/layeh/asar"
 	"github.com/pterm/pterm"
+	"github.com/shirou/gopsutil/v3/process"
 	"os"
 	"os/exec"
 	"path"
 	"regexp"
 	"runtime"
+	"strings"
 )
 
 func getSysInfo() (oSystem string, err error) {
@@ -129,4 +131,22 @@ func getAppVersion() {
 	ftbApp.JarVersion = versionJson.JarVersion
 	ftbApp.WebVersion = versionJson.WebVersion
 	ftbApp.AppBranch = versionJson.Branch
+}
+
+func getFTBProcess() {
+	processes, err := process.Processes()
+	if err != nil {
+		pterm.Error.Println("Error getting processes\n", err)
+		return
+	}
+
+	for _, p := range processes {
+		n, err := p.Name()
+		if err != nil {
+			pterm.Warning.Println("Error getting process name\n", err)
+		}
+		if n != "" && strings.ToLower(n) == "ftb-app" {
+			p.Kill()
+		}
+	}
 }

@@ -22,7 +22,41 @@ import (
 	"strings"
 )
 
-var hasteClient *haste.Haste
+var (
+	hasteClient       *haste.Haste
+	checkRequestsURLs = map[string]CheckURLStruct{
+		"https://api.modpacks.ch/public/api/ping": {
+			method:             "GET",
+			validateResponse:   true,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
+		},
+		"https://api.creeper.host/api/health": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "",
+		},
+		"https://maven.creeperhost.net": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "",
+		},
+		"https://maven.fabricmc.net": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "",
+		},
+		"https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "",
+		},
+	}
+)
 
 func cleanup(logFile *os.File) {
 	if err := logFile.Close(); err != nil {
@@ -301,13 +335,48 @@ func sanitiseSettings(data []byte) ([]byte, error) {
 	return output, nil
 }
 
-func requestChecks(url string) (bool, string) {
-	req, err := http.Head(url)
-	if err != nil {
-		return false, err.Error()
-	}
-	if req.StatusCode != http.StatusOK {
-		return false, fmt.Sprintf("Request returned non 200 status: %d (%s)", req.StatusCode, req.Status)
-	}
-	return true, fmt.Sprintf("Request Successful, %s", req.Status)
-}
+// MTR no werk sockets n stuff bad
+//func runMTR(address string) {
+//	m, ch, err := mtr.NewMTR(address, srcAddr, 800 * time.Millisecond, 100 * time.Millisecond, time.Nanosecond,
+//		64, 100, 50, false)
+//	if err != nil {
+//		pterm.Error.Println("Error running MTR\n", err)
+//		return
+//	}
+//	fmt.Println("Start:", time.Now())
+//	temp, err := os.CreateTemp(os.TempDir(), "ftb-debug-tmp-mtr")
+//	defer temp.Close()
+//	if err != nil {
+//		pterm.Error.Println("Error creating tmp MTR file")
+//		return
+//	}
+//	tm.Output = bufio.NewWriter(temp)
+//	tm.Clear()
+//	mu := &sync.Mutex{}
+//	go func(ch chan struct{}) {
+//		for {
+//			mu.Lock()
+//			<-ch
+//			render(m)
+//			mu.Unlock()
+//		}
+//	}(ch)
+//	m.Run(ch, COUNT)
+//	close(ch)
+//	mu.Lock()
+//	render(m)
+//	mu.Unlock()
+//	contents, err := os.ReadFile(temp.Name())
+//	if err != nil {
+//		pterm.Error.Println("Error reading mtr file\n", err)
+//		return
+//	}
+//	pterm.Info.Println(string(contents))
+//
+//}
+//
+//func render(m *mtr.MTR) {
+//	tm.MoveCursor(1, 1)
+//	m.Render(1)
+//	tm.Flush() // Call it every time at the end of rendering
+//}
