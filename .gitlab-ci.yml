@@ -72,7 +72,7 @@ build_macos:
   variables:
     CGO_ENABLED: 0
     GOOS: darwin
-    FILE_OUTPUT: "macos"
+    FILE_OUTPUT: "-macos"
 
 build_macos-m1:
   extends: .build
@@ -80,7 +80,7 @@ build_macos-m1:
     CGO_ENABLED: 0
     GOOS: darwin
     GOARCH: arm64
-    FILE_OUTPUT: "macos-arm64"
+    FILE_OUTPUT: "-macos-arm64"
 
 package:
   stage: package
