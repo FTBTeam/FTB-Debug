@@ -9,8 +9,8 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/getsentry/sentry-go"
 	"github.com/pterm/pterm"
+	"github.com/pterm/pterm/putils"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -86,9 +86,9 @@ func main() {
 	pterm.SetDefaultOutput(logMw)
 
 	logo, _ := pterm.DefaultBigText.WithLetters(
-		pterm.NewLettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),
-		pterm.NewLettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
-		pterm.NewLettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
+		putils.LettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),
+		putils.LettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
+		putils.LettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
 	pterm.DefaultCenter.Println(logo)
 	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "1.0.1", GitCommit, time.Now().UTC().Format(time.RFC1123)))
 	pterm.Debug.Println("Verbose logging enabled")
@@ -216,27 +216,25 @@ func uploadFiles() {
 
 	if appLocated {
 		if ftbApp.Structure.Bin.Exists {
-			uploadFile(ftbApp.InstallLocation, path.Join("bin", "settings.json"))
-			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_log.txt"))
-			uploadFile(ftbApp.InstallLocation, path.Join("bin", "launcher_cef_log.txt"))
-			uploadFile(ftbApp.InstallLocation, path.Join("bin", "versions", "version_manifest.json"))
+			newUploadFile(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"), "settings.json")
+			newUploadFile(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"), "version_manifest.json")
 		}
 		for _, file := range filesToUpload {
 			pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
 			newUploadFile(file.Path, file.File.Name())
 		}
-		uploadFile(ftbApp.InstallLocation, path.Join("logs", "latest.log"))
-		uploadFile(ftbApp.InstallLocation, path.Join("logs", "debug.log"))
+		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "latest.log"), "latest.log")
+		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "debug.log")
 	}
 
 	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "index.html.log"))
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "background.html.log"))
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App", "chat.html.log"))
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "index.html.log"), "index.html.log")
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "background.html.log"), "background.html.log")
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "chat.html.log"), "chat.html.log")
 	} else if *betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview")) {
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "index.html.log"))
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "background.html.log"))
-		uploadFile(appLocal, path.Join("Overwolf", "Log", "Apps", "FTB App Preview", "chat.html.log"))
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "index.html.log"), "index.html.log")
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "background.html.log"), "background.html.log")
+		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "chat.html.log"), "chat.html.log")
 	}
 }
 
@@ -339,14 +337,14 @@ func listInstances() {
 							for _, file := range files {
 								if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" {
 									pterm.Debug.Println("Found log file:", file.Name())
-									fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
+									fInfo, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
 									if err != nil {
 										sentry.CaptureException(err)
 										pterm.Error.Println("Error getting file info:", err)
 									}
 									//pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
 									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
-									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: file, Path: path.Join(ftbApp.Settings.InstanceLocation, name, file.Name())})
+									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: file, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name())})
 									//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", file.Name()))
 								}
 							}
@@ -362,7 +360,7 @@ func listInstances() {
 					if validUuid == nil {
 						pterm.Error.Println(name, " instance name: invalid uuid")
 					}
-					_, err = validateJson(name+" instance.json", path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					_, err = validateJson(name+" instance.json", filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
 						sentry.CaptureException(err)
 						pterm.Error.Println("instance.json failed to validate")

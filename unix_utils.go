@@ -13,7 +13,6 @@ import (
 	"github.com/shirou/gopsutil/v3/process"
 	"os"
 	"os/exec"
-	"path"
 	"regexp"
 	"runtime"
 	"strings"
@@ -53,16 +52,16 @@ func getSysInfo() (oSystem string, err error) {
 
 func locateApp() bool {
 	if runtime.GOOS == "darwin" {
-		if checkFilePathExistsSpinner("FTB App directory (Application Support)", path.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
-			ftbApp.InstallLocation = path.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
+		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
 			return true
 		} else {
 			pterm.Error.Println("Unable to find app install")
 			return false
 		}
 	} else if runtime.GOOS == "linux" {
-		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", path.Join(ftbApp.User.HomeDir, ".ftba")) {
-			ftbApp.InstallLocation = path.Join(ftbApp.User.HomeDir, ".ftba")
+		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
 			return true
 		} else {
 			pterm.Error.Println("Unable to find app install")
@@ -79,10 +78,10 @@ func getAppVersion() {
 	ftbApp.AppVersion = "Electron"
 	var appPath string
 	if runtime.GOOS == "darwin" {
-		appPath = path.Join(ftbApp.User.HomeDir, "Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
+		appPath = filepath.Join(ftbApp.User.HomeDir, "Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
 		installExists := checkFilePathExistsSpinner("App install (User home)", appPath)
 		if !installExists {
-			appPath = path.Join("/Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
+			appPath = filepath.Join("/Applications", "FTBApp.app", "contents", "Resources", "app", "bin", "ftbapp.app", "Contents", "Resources", "app.asar")
 			installExists = checkFilePathExistsSpinner("App install (User home)", appPath)
 			if !installExists {
 				ftbApp.JarVersion = "N/A"
@@ -92,7 +91,7 @@ func getAppVersion() {
 			}
 		}
 	} else if runtime.GOOS == "linux" {
-		appPath = path.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
+		appPath = filepath.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
 	} else {
 		sentry.CaptureException(errors.New("unable to determine OS"))
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")

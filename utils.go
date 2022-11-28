@@ -151,6 +151,7 @@ func checkFilePath(filePath string) (string, bool) {
 }
 
 func newUploadFile(filePath string, fileName string) {
+	pterm.Debug.Println(filePath)
 	data, err := os.ReadFile(filePath)
 	if fileName == "launcher_profiles.json" {
 		data, err = sanitiseProfile(data)
@@ -167,7 +168,7 @@ func newUploadFile(filePath string, fileName string) {
 		}
 	}
 	if err != nil {
-		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file", fileName))
+		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file\n%v", fileName, err))
 	} else {
 		resp, err := hasteClient.UploadBytes(data)
 		if err != nil {
@@ -197,7 +198,7 @@ func uploadFile(filePath string, name string) {
 		}
 	}
 	if err != nil {
-		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file", name))
+		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file\n%v", name, err))
 	} else {
 		resp, err := hasteClient.UploadBytes(data)
 		if err != nil {
