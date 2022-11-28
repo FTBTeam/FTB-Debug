@@ -11,7 +11,6 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -92,7 +91,7 @@ func validateJson(message string, filePath string) (bool, error) {
 		}
 
 		defer jsonFile.Close()
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := io.ReadAll(jsonFile)
 		valid := json.Valid(byteValue)
 		if !valid {
 			sentry.CaptureException(err)
@@ -184,7 +183,7 @@ func newUploadFile(filePath string, fileName string) {
 }
 
 func uploadFile(filePath string, name string) {
-	data, err := ioutil.ReadFile(path.Join(filePath, name))
+	data, err := os.ReadFile(path.Join(filePath, name))
 	if name == "bin/launcher_profiles.json" {
 		data, err = sanitiseProfile(data)
 		if err != nil {
@@ -230,7 +229,7 @@ func newUploadBigFile(filePath string, fileName string) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
@@ -258,7 +257,7 @@ func uploadBigFile(filePath string, name string) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))

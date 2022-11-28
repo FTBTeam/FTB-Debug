@@ -49,7 +49,7 @@ func init() {
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
 	}
-	logFile, err = ioutil.TempFile("", "ftb-debug-log")
+	logFile, err = os.CreateTemp("", "ftb-debug-log")
 	if err != nil {
 		pterm.Fatal.Println(err)
 	}
@@ -175,7 +175,7 @@ func main() {
 
 	pterm.DefaultSection.Println("Debug Report Completed")
 
-	tUpload, err := ioutil.ReadFile(logFile.Name())
+	tUpload, err := os.ReadFile(logFile.Name())
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println("Failed to upload log file", logFile.Name())
@@ -264,9 +264,9 @@ func loadAppSettings() error {
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
-		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+		doesAppSettingsExist := checkFilePathExistsSpinner("Does app_settings.json exist?", filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 		if doesAppSettingsExist {
-			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 			if err != nil {
 				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading settings.json:", err)
@@ -274,7 +274,7 @@ func loadAppSettings() error {
 			}
 
 		} else {
-			appSettings, err = ioutil.ReadFile(path.Join(ftbApp.InstallLocation, "app_settings.json"))
+			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "app_settings.json"))
 			if err != nil {
 				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading app_settings.json:", err)
@@ -298,14 +298,14 @@ func loadAppSettings() error {
 func listInstances() {
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
-		instances, _ := ioutil.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
+		instances, _ := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
 		for _, instance := range instances {
 			name := instance.Name()
 			if instance.IsDir() {
 				if name != ".localCache" {
 					pterm.Info.Println("found instance: ", name)
 					var i Instance
-					data, err := ioutil.ReadFile(path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					data, err := os.ReadFile(path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
 						sentry.CaptureException(err)
 						pterm.Error.Println("Error reading instance.json:", err)
@@ -331,7 +331,7 @@ func listInstances() {
 
 					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 					if logFolderExists {
-						files, err := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+						files, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						if err != nil {
 							sentry.CaptureException(err)
 							pterm.Error.Println("Error getting file list at:", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))

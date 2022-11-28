@@ -1,5 +1,4 @@
 //go:build windows
-// +build windows
 
 package main
 
@@ -11,7 +10,7 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/yusufpapurcu/wmi"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"sort"
@@ -30,7 +29,7 @@ func getAppVersion() {
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
 	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)
-	files, err := ioutil.ReadDir(overwolfDIR)
+	files, err := os.ReadDir(overwolfDIR)
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println("Error while reading Overwolf versions")
@@ -59,7 +58,7 @@ func getAppVersion() {
 		pterm.Error.Println("Error opening version.json:", err)
 	}
 	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	var versionJson VersionJson
 	json.Unmarshal(byteValue, &versionJson)
 	ftbApp.JarVersion = versionJson.JarVersion
