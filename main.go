@@ -323,7 +323,6 @@ func listInstances() {
 						if strings.HasPrefix(baseFile.Name(), "hs_err_") {
 							pterm.Debug.Println("Found java segfault log:", baseFile.Name())
 							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: baseFile, Path: path.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
-							//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, baseFile.Name()))
 						}
 					}
 
@@ -342,19 +341,11 @@ func listInstances() {
 										sentry.CaptureException(err)
 										pterm.Error.Println("Error getting file info:", err)
 									}
-									//pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
 									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
 									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: file, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name())})
-									//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", file.Name()))
 								}
 							}
 						}
-						//fInfo, err := os.Stat(path.Join(ftbApp.Settings.InstanceLocation, name, "logs", "latest.log"))
-						//if err != nil {
-						//	pterm.Error.Println("Error reading latest.log:", err)
-						//}
-						//pterm.Info.Println("Latest log timestamp:", fInfo.ModTime().Format("2006-01-02 15:04:05"))
-						//uploadFile(path.Join(ftbApp.Settings.InstanceLocation), path.Join(name, "logs", "latest.log"))
 					}
 					validUuid := re.Find([]byte(name))
 					if validUuid == nil {

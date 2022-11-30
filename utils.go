@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 )
@@ -154,18 +155,19 @@ func newUploadFile(filePath string, fileName string) {
 	pterm.Debug.Println(filePath)
 	data, err := os.ReadFile(filePath)
 	if fileName == "launcher_profiles.json" {
-		data, err = sanitiseProfile(data)
+		data, err = sanitizeProfile(data)
 		if err != nil {
-			pterm.Warning.Println("Error sanitising launcher_profiles.json")
+			pterm.Warning.Println("Error sanitizing launcher_profiles.json")
 			return
 		}
-	}
-	if fileName == "settings.json" {
-		data, err = sanitiseSettings(data)
+	} else if fileName == "settings.json" {
+		data, err = sanitizeSettings(data)
 		if err != nil {
-			pterm.Warning.Println("Error sanitising settings.json")
+			pterm.Warning.Println("Error sanitizing settings.json")
 			return
 		}
+	} else {
+		data = sanitizeLogs(data)
 	}
 	if err != nil {
 		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file\n%v", fileName, err))
@@ -183,66 +185,8 @@ func newUploadFile(filePath string, fileName string) {
 	}
 }
 
-func uploadFile(filePath string, name string) {
-	data, err := os.ReadFile(path.Join(filePath, name))
-	if name == "bin/launcher_profiles.json" {
-		data, err = sanitiseProfile(data)
-		if err != nil {
-			return
-		}
-	}
-	if name == "bin/settings.json" {
-		data, err = sanitiseSettings(data)
-		if err != nil {
-			return
-		}
-	}
-	if err != nil {
-		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file\n%v", name, err))
-	} else {
-		resp, err := hasteClient.UploadBytes(data)
-		if err != nil {
-			pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to upload - %s", name, err.Error()))
-			if err.Error() == "file too large" {
-				pterm.Info.Println("Trying again with transfer.sh")
-				uploadBigFile(filePath, name)
-			}
-		} else {
-			pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name, resp.GetLink(hasteClient)))
-		}
-	}
-}
-
-func newUploadBigFile(filePath string, fileName string) {
-	req, err := newfileUploadRequest(filePath)
-	if err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
-		pterm.Error.Println(err)
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
-		pterm.Error.Println(err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", fileName))
-		pterm.Error.Println(err)
-	} else {
-		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", fileName, strings.TrimSuffix(string(body), "\n")))
-	}
-
-}
-
 func uploadBigFile(filePath string, name string) {
-	req, err := newfileUploadRequest(path.Join(filePath, name))
+	req, err := uploadFileRequest(path.Join(filePath, name))
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
@@ -269,7 +213,7 @@ func uploadBigFile(filePath string, name string) {
 
 }
 
-func newfileUploadRequest(path string) (*http.Request, error) {
+func uploadFileRequest(path string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -294,9 +238,9 @@ func newfileUploadRequest(path string) (*http.Request, error) {
 	return req, err
 }
 
-func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
+func sanitizeProfile(data []byte) ([]byte, error) {
 	var i interface{}
-	if err = json.Unmarshal(data, &i); err != nil {
+	if err := json.Unmarshal(data, &i); err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println("Error reading launcher profile:", err)
 		pterm.Debug.Println("JSON data:", string(data))
@@ -312,11 +256,10 @@ func sanitiseProfile(data []byte) (sanitisedData []byte, err error) {
 		pterm.Error.Println("Error marshaling json:", err)
 		return nil, err
 	}
-	//pterm.Debug.Println(string(output))
 	return output, nil
 }
 
-func sanitiseSettings(data []byte) ([]byte, error) {
+func sanitizeSettings(data []byte) ([]byte, error) {
 	var i AppSettings
 	if err := json.Unmarshal(data, &i); err != nil {
 		sentry.CaptureException(err)
@@ -331,52 +274,12 @@ func sanitiseSettings(data []byte) ([]byte, error) {
 		pterm.Error.Println("Error marshaling json:", err)
 		return nil, err
 	}
-	//pterm.Debug.Println(string(output))
 	return output, nil
 }
 
-// MTR no werk sockets n stuff bad
-//func runMTR(address string) {
-//	m, ch, err := mtr.NewMTR(address, srcAddr, 800 * time.Millisecond, 100 * time.Millisecond, time.Nanosecond,
-//		64, 100, 50, false)
-//	if err != nil {
-//		pterm.Error.Println("Error running MTR\n", err)
-//		return
-//	}
-//	fmt.Println("Start:", time.Now())
-//	temp, err := os.CreateTemp(os.TempDir(), "ftb-debug-tmp-mtr")
-//	defer temp.Close()
-//	if err != nil {
-//		pterm.Error.Println("Error creating tmp MTR file")
-//		return
-//	}
-//	tm.Output = bufio.NewWriter(temp)
-//	tm.Clear()
-//	mu := &sync.Mutex{}
-//	go func(ch chan struct{}) {
-//		for {
-//			mu.Lock()
-//			<-ch
-//			render(m)
-//			mu.Unlock()
-//		}
-//	}(ch)
-//	m.Run(ch, COUNT)
-//	close(ch)
-//	mu.Lock()
-//	render(m)
-//	mu.Unlock()
-//	contents, err := os.ReadFile(temp.Name())
-//	if err != nil {
-//		pterm.Error.Println("Error reading mtr file\n", err)
-//		return
-//	}
-//	pterm.Info.Println(string(contents))
-//
-//}
-//
-//func render(m *mtr.MTR) {
-//	tm.MoveCursor(1, 1)
-//	m.Render(1)
-//	tm.Flush() // Call it every time at the end of rendering
-//}
+func sanitizeLogs(data []byte) []byte {
+	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M[a-zA-Z0-9._+!\*\$/-]+)`)
+
+	clean := reToken.ReplaceAll(data, []byte("${1}******AUTHTOKEN******$3"))
+	return clean
+}
