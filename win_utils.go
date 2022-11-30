@@ -26,6 +26,7 @@ type (
 
 // TODO implement getting app version from overwolf
 func getAppVersion() {
+	defer sentry.Recover()
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
 	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)
@@ -67,6 +68,7 @@ func getAppVersion() {
 }
 
 func getSysInfo() (oSystem string, err error) {
+	defer sentry.Recover()
 	var dst []Win32_OperatingSystem
 
 	q := wmi.CreateQuery(&dst, "")
@@ -79,6 +81,7 @@ func getSysInfo() (oSystem string, err error) {
 }
 
 func locateApp() bool {
+	defer sentry.Recover()
 	if checkFilePathExistsSpinner("FTB App directory (AppData)", path.Join(os.Getenv("localappdata"), ".ftba")) {
 		ftbApp.InstallLocation = path.Join(os.Getenv("localappdata"), ".ftba")
 		return true
@@ -92,6 +95,7 @@ func locateApp() bool {
 }
 
 func getFTBProcess() {
+	defer sentry.Recover()
 	processes, err := process.Processes()
 	if err != nil {
 		pterm.Error.Println("Error getting processes\n", err)

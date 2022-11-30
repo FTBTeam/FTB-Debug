@@ -19,6 +19,7 @@ import (
 )
 
 func getSysInfo() (oSystem string, err error) {
+	defer sentry.Recover()
 	switch runtime.GOOS {
 	case "linux":
 		out, err := exec.Command("hostnamectl").Output()
@@ -51,6 +52,7 @@ func getSysInfo() (oSystem string, err error) {
 }
 
 func locateApp() bool {
+	defer sentry.Recover()
 	if runtime.GOOS == "darwin" {
 		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
 			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
@@ -75,6 +77,7 @@ func locateApp() bool {
 }
 
 func getAppVersion() {
+	defer sentry.Recover()
 	ftbApp.AppVersion = "Electron"
 	var appPath string
 	if runtime.GOOS == "darwin" {
@@ -133,6 +136,7 @@ func getAppVersion() {
 }
 
 func getFTBProcess() {
+	defer sentry.Recover()
 	processes, err := process.Processes()
 	if err != nil {
 		pterm.Error.Println("Error getting processes\n", err)

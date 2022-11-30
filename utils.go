@@ -59,6 +59,7 @@ var (
 )
 
 func cleanup(logFile *os.File) {
+	defer sentry.Recover()
 	if err := logFile.Close(); err != nil {
 		log.Fatal("Unable to close temp log file: ", err)
 	}
@@ -68,6 +69,7 @@ func cleanup(logFile *os.File) {
 }
 
 func ByteCountIEC(b int64) string {
+	defer sentry.Recover()
 	const unit = 1024
 	if b < unit {
 		return fmt.Sprintf("%d B", b)
@@ -82,6 +84,7 @@ func ByteCountIEC(b int64) string {
 }
 
 func validateJson(message string, filePath string) (bool, error) {
+	defer sentry.Recover()
 	jsonF := checkFilePathExistsSpinner(message, filePath)
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
@@ -106,6 +109,7 @@ func validateJson(message string, filePath string) (bool, error) {
 }
 
 func getOSInfo() {
+	defer sentry.Recover()
 	cpuInfo, _ := cpu.Info()
 	memInfo, _ := mem.VirtualMemory()
 	oSystem, err := getSysInfo()
@@ -128,6 +132,7 @@ func getOSInfo() {
 }
 
 func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
+	defer sentry.Recover()
 	dirStatus, _ := pterm.DefaultSpinner.Start("Checking ", "for ", dirMessage)
 	message, success := checkFilePath(filePath)
 	if !success {
@@ -140,6 +145,7 @@ func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
 }
 
 func checkFilePath(filePath string) (string, bool) {
+	defer sentry.Recover()
 	if _, err := os.Stat(filePath); err == nil {
 		return "file/directory exists", true
 
@@ -152,6 +158,7 @@ func checkFilePath(filePath string) (string, bool) {
 }
 
 func newUploadFile(filePath string, fileName string) {
+	defer sentry.Recover()
 	pterm.Debug.Println(filePath)
 	data, err := os.ReadFile(filePath)
 	if fileName == "launcher_profiles.json" {
@@ -186,6 +193,7 @@ func newUploadFile(filePath string, fileName string) {
 }
 
 func uploadBigFile(filePath string, name string) {
+	defer sentry.Recover()
 	req, err := uploadFileRequest(path.Join(filePath, name))
 	if err != nil {
 		sentry.CaptureException(err)
@@ -214,6 +222,7 @@ func uploadBigFile(filePath string, name string) {
 }
 
 func uploadFileRequest(path string) (*http.Request, error) {
+	defer sentry.Recover()
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -239,6 +248,7 @@ func uploadFileRequest(path string) (*http.Request, error) {
 }
 
 func sanitizeProfile(data []byte) ([]byte, error) {
+	defer sentry.Recover()
 	var i interface{}
 	if err := json.Unmarshal(data, &i); err != nil {
 		sentry.CaptureException(err)
@@ -260,6 +270,7 @@ func sanitizeProfile(data []byte) ([]byte, error) {
 }
 
 func sanitizeSettings(data []byte) ([]byte, error) {
+	defer sentry.Recover()
 	var i AppSettings
 	if err := json.Unmarshal(data, &i); err != nil {
 		sentry.CaptureException(err)
@@ -278,6 +289,7 @@ func sanitizeSettings(data []byte) ([]byte, error) {
 }
 
 func sanitizeLogs(data []byte) []byte {
+	defer sentry.Recover()
 	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M\.R3[a-zA-Z0-9._+!\*\$/-]+)`)
 
 	clean := reToken.ReplaceAll(data, []byte("${1}******AUTHTOKEN******$3"))

@@ -36,6 +36,7 @@ var (
 )
 
 func init() {
+	defer sentry.Recover()
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
@@ -61,6 +62,7 @@ func init() {
 }
 
 func main() {
+	defer sentry.Recover()
 	if GitCommit == "" {
 		GitCommit = "Dev"
 	}
@@ -113,10 +115,12 @@ func main() {
 		req, err := http.NewRequest(checks.method, url, nil)
 		if err != nil {
 			pterm.Error.Println("Error creating request to %s\n%s", url, err.Error())
+			continue
 		}
 		resp, err := client.Do(req)
 		if err != nil {
 			pterm.Error.Println("Error making request to %s\n%s", url, err.Error())
+			continue
 		}
 
 		// DO checks
@@ -211,6 +215,7 @@ func main() {
 }
 
 func uploadFiles() {
+	defer sentry.Recover()
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
 
@@ -239,6 +244,7 @@ func uploadFiles() {
 }
 
 func doesBinExist() {
+	defer sentry.Recover()
 	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		ftbApp.Structure.Bin.Exists = true
@@ -259,6 +265,7 @@ func doesBinExist() {
 //}
 
 func loadAppSettings() error {
+	defer sentry.Recover()
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
@@ -294,6 +301,7 @@ func loadAppSettings() error {
 }
 
 func listInstances() {
+	defer sentry.Recover()
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		instances, _ := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
