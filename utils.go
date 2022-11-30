@@ -278,7 +278,7 @@ func sanitizeSettings(data []byte) ([]byte, error) {
 }
 
 func sanitizeLogs(data []byte) []byte {
-	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M[a-zA-Z0-9._+!\*\$/-]+)`)
+	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M\.R3[a-zA-Z0-9._+!\*\$/-]+)`)
 
 	clean := reToken.ReplaceAll(data, []byte("${1}******AUTHTOKEN******$3"))
 	return clean
