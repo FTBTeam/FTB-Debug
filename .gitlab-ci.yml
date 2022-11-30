@@ -87,7 +87,7 @@ package:
   stage: package
   script:
     - echo "packaging everything here"
-    - zip -r binaries binaries
+    - zip -r binaries ftb-debug*
   #    - chmod +x upx.sh && ./upx.sh
   needs:
     - build_linux
