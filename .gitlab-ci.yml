@@ -20,6 +20,7 @@ before_script:
   - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
+  - apk add --no-cache zip
 
 stages:
   - build
@@ -86,6 +87,7 @@ package:
   stage: package
   script:
     - echo "packaging everything here"
+    - zip -r binaries binaries
   #    - chmod +x upx.sh && ./upx.sh
   needs:
     - build_linux
