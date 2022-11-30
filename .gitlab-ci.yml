@@ -87,7 +87,7 @@ package:
   stage: package
   script:
     - echo "packaging everything here"
-    - zip -r binaries ftb-debug*
+    - zip -r ftb-debug-$CI_COMMIT_SHORT_SHA ftb-debug*
   #    - chmod +x upx.sh && ./upx.sh
   needs:
     - build_linux
@@ -97,6 +97,7 @@ package:
     - build_macos
     - build_macos-m1
   artifacts:
-    name: all-artifacts
-    untracked: true
+    name: all-binaries
+    paths:
+      - "ftb-debug-$CI_COMMIT_SHORT_SHA.zip"
     expire_in: 1 week
