@@ -30,6 +30,7 @@ var (
 	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
 	betaApp       *bool
+	silent        *bool
 	GitCommit     string
 	filesToUpload []FilesToUploadStruct
 	appLocated    bool
@@ -40,6 +41,7 @@ func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
+	silent = flag.Bool("silent", false, "Only output the support code in console")
 	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
 
@@ -84,8 +86,11 @@ func main() {
 
 	defer sentry.Flush(2 * time.Second)
 	defer cleanup(logFile)
-	logMw = io.MultiWriter(os.Stdout, logFile)
-	pterm.SetDefaultOutput(logMw)
+	if *silent {
+		logToConsole(false)
+	} else {
+		logToConsole(true)
+	}
 
 	logo, _ := pterm.DefaultBigText.WithLetters(
 		putils.LettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),
@@ -191,10 +196,15 @@ func main() {
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
+			if *silent {
+				logToConsole(true)
+			}
 			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println(fmt.Sprintf("Please provide this code to support: FTB-DBG%s", strings.ToUpper(resp.Key)))
 		}
 	}
-
+	if *silent {
+		logToConsole(true)
+	}
 	pterm.Info.Println("Press ESC to exit...")
 
 	if err := keyboard.Open(); err != nil {
