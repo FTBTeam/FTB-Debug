@@ -183,6 +183,9 @@ func main() {
 	uploadFiles()
 
 	pterm.DefaultSection.Println("Debug Report Completed")
+	if *silent {
+		logToConsole(true)
+	}
 
 	tUpload, err := os.ReadFile(logFile.Name())
 	if err != nil {
@@ -196,14 +199,8 @@ func main() {
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
-			if *silent {
-				logToConsole(true)
-			}
 			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println(fmt.Sprintf("Please provide this code to support: FTB-DBG%s", strings.ToUpper(resp.Key)))
 		}
-	}
-	if *silent {
-		logToConsole(true)
 	}
 	pterm.Info.Println("Press ESC to exit...")
 
