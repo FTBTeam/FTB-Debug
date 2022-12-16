@@ -30,7 +30,7 @@ var (
 	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
 	betaApp       *bool
-	silent        *bool
+	cli           *bool
 	GitCommit     string
 	filesToUpload []FilesToUploadStruct
 	appLocated    bool
@@ -41,7 +41,7 @@ func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
-	silent = flag.Bool("silent", false, "Only output the support code in console")
+	cli = flag.Bool("cli", false, "Only output the support code in console")
 	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
 
@@ -86,7 +86,7 @@ func main() {
 
 	defer sentry.Flush(2 * time.Second)
 	defer cleanup(logFile)
-	if *silent {
+	if *cli {
 		logToConsole(false)
 	} else {
 		logToConsole(true)
@@ -183,7 +183,7 @@ func main() {
 	uploadFiles()
 
 	pterm.DefaultSection.Println("Debug Report Completed")
-	if *silent {
+	if *cli {
 		logToConsole(true)
 	}
 
@@ -202,21 +202,24 @@ func main() {
 			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println(fmt.Sprintf("Please provide this code to support: FTB-DBG%s", strings.ToUpper(resp.Key)))
 		}
 	}
-	pterm.Info.Println("Press ESC to exit...")
 
-	if err := keyboard.Open(); err != nil {
-		panic(err)
-	}
-	defer func() {
-		_ = keyboard.Close()
-	}()
-	for {
-		_, key, err := keyboard.GetKey()
-		if err != nil {
+	if !*cli {
+		pterm.Info.Println("Press ESC to exit...")
+
+		if err := keyboard.Open(); err != nil {
 			panic(err)
 		}
-		if key == keyboard.KeyEsc {
-			break
+		defer func() {
+			_ = keyboard.Close()
+		}()
+		for {
+			_, key, err := keyboard.GetKey()
+			if err != nil {
+				panic(err)
+			}
+			if key == keyboard.KeyEsc {
+				break
+			}
 		}
 	}
 }
