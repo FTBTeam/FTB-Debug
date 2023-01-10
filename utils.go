@@ -250,42 +250,48 @@ func uploadFileRequest(path string) (*http.Request, error) {
 func sanitizeProfile(data []byte) ([]byte, error) {
 	defer sentry.Recover()
 	var i interface{}
-	if err := json.Unmarshal(data, &i); err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println("Error reading launcher profile:", err)
-		pterm.Debug.Println("JSON data:", string(data))
-		return nil, err
+	if data != nil {
+		if err := json.Unmarshal(data, &i); err != nil {
+			sentry.CaptureException(err)
+			pterm.Error.Println("Error reading launcher profile:", err)
+			pterm.Debug.Println("JSON data:", string(data))
+			return nil, err
+		}
+		if m, ok := i.(map[string]interface{}); ok {
+			delete(m, "authenticationDatabase")
+			delete(m, "clientToken")
+		}
+		output, err := json.MarshalIndent(i, "", "  ")
+		if err != nil {
+			sentry.CaptureException(err)
+			pterm.Error.Println("Error marshaling json:", err)
+			return nil, err
+		}
+		return output, nil
 	}
-	if m, ok := i.(map[string]interface{}); ok {
-		delete(m, "authenticationDatabase")
-		delete(m, "clientToken")
-	}
-	output, err := json.MarshalIndent(i, "", "  ")
-	if err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println("Error marshaling json:", err)
-		return nil, err
-	}
-	return output, nil
+	return nil, fmt.Errorf("unable to sanitize profile, parameter data is nil")
 }
 
 func sanitizeSettings(data []byte) ([]byte, error) {
 	defer sentry.Recover()
-	var i AppSettings
-	if err := json.Unmarshal(data, &i); err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println("Error reading app settings:", err)
-		pterm.Debug.Println("JSON data:", string(data))
-		return nil, err
+	if data != nil {
+		var i AppSettings
+		if err := json.Unmarshal(data, &i); err != nil {
+			sentry.CaptureException(err)
+			pterm.Error.Println("Error reading app settings:", err)
+			pterm.Debug.Println("JSON data:", string(data))
+			return nil, err
+		}
+		i.SessionString = "************************"
+		output, err := json.MarshalIndent(i, "", "  ")
+		if err != nil {
+			sentry.CaptureException(err)
+			pterm.Error.Println("Error marshaling json:", err)
+			return nil, err
+		}
+		return output, nil
 	}
-	i.SessionString = "************************"
-	output, err := json.MarshalIndent(i, "", "  ")
-	if err != nil {
-		sentry.CaptureException(err)
-		pterm.Error.Println("Error marshaling json:", err)
-		return nil, err
-	}
-	return output, nil
+	return nil, fmt.Errorf("unable to sanitize settings, parameter data is nil")
 }
 
 func sanitizeLogs(data []byte) []byte {
