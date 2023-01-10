@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"os/user"
-	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -242,11 +241,11 @@ func uploadFiles() {
 		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "debug.log")
 	}
 
-	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
+	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "index.html.log"), "index.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "background.html.log"), "background.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "chat.html.log"), "chat.html.log")
-	} else if *betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", path.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview")) {
+	} else if *betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview")) {
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "index.html.log"), "index.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "background.html.log"), "background.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "chat.html.log"), "chat.html.log")
@@ -255,7 +254,7 @@ func uploadFiles() {
 
 func doesBinExist() {
 	defer sentry.Recover()
-	binExists := checkFilePathExistsSpinner("Minecraft bin directory", path.Join(ftbApp.InstallLocation, "bin"))
+	binExists := checkFilePathExistsSpinner("Minecraft bin directory", filepath.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		ftbApp.Structure.Bin.Exists = true
 	}
@@ -314,14 +313,14 @@ func listInstances() {
 	defer sentry.Recover()
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
-		instances, _ := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation))
+		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
 		for _, instance := range instances {
 			name := instance.Name()
 			if instance.IsDir() {
 				if name != ".localCache" {
 					pterm.Info.Println("found instance: ", name)
 					var i Instance
-					data, err := os.ReadFile(path.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					data, err := os.ReadFile(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
 						sentry.CaptureException(err)
 						pterm.Error.Println("Error reading instance.json:", err)
@@ -336,20 +335,20 @@ func listInstances() {
 					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
 					pterm.Info.Println("Is Modified:", i.IsModified)
 
-					baseFiles, err := os.ReadDir(path.Join(ftbApp.Settings.InstanceLocation, name))
+					baseFiles, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name))
 					for _, baseFile := range baseFiles {
 						if strings.HasPrefix(baseFile.Name(), "hs_err_") {
 							pterm.Debug.Println("Found java segfault log:", baseFile.Name())
-							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: baseFile, Path: path.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
+							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: baseFile, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
 						}
 					}
 
-					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 					if logFolderExists {
 						files, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						if err != nil {
 							sentry.CaptureException(err)
-							pterm.Error.Println("Error getting file list at:", path.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+							pterm.Error.Println("Error getting file list at:", filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						} else {
 							for _, file := range files {
 								if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" {

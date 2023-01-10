@@ -12,7 +12,7 @@ import (
 	"github.com/yusufpapurcu/wmi"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -29,7 +29,7 @@ func getAppVersion() {
 	defer sentry.Recover()
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
-	overwolfDIR := path.Join(appLocal, "Overwolf", "Extensions", owUID)
+	overwolfDIR := filepath.Join(appLocal, "Overwolf", "Extensions", owUID)
 	files, err := os.ReadDir(overwolfDIR)
 	if err != nil {
 		sentry.CaptureException(err)
@@ -52,7 +52,7 @@ func getAppVersion() {
 	pterm.Debug.Println("Found versions:", versions)
 	ftbApp.AppVersion = versions[0].String()
 
-	jsonFile, err := os.Open(path.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
+	jsonFile, err := os.Open(filepath.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		sentry.CaptureException(err)
@@ -82,11 +82,11 @@ func getSysInfo() (oSystem string, err error) {
 
 func locateApp() bool {
 	defer sentry.Recover()
-	if checkFilePathExistsSpinner("FTB App directory (AppData)", path.Join(os.Getenv("localappdata"), ".ftba")) {
-		ftbApp.InstallLocation = path.Join(os.Getenv("localappdata"), ".ftba")
+	if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
+		ftbApp.InstallLocation = filepath.Join(os.Getenv("localappdata"), ".ftba")
 		return true
-	} else if checkFilePathExistsSpinner("FTB App directory (home)", path.Join(ftbApp.User.HomeDir, ".ftba")) {
-		ftbApp.InstallLocation = path.Join(ftbApp.User.HomeDir, ".ftba")
+	} else if checkFilePathExistsSpinner("FTB App directory (home)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+		ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
 		return true
 	} else {
 		pterm.Error.Println("Unable to find app install")
