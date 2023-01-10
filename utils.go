@@ -193,7 +193,7 @@ func newUploadFile(filePath string, fileName string) {
 
 func uploadBigFile(filePath string, name string) {
 	defer sentry.Recover()
-	req, err := uploadFileRequest(filepath.Join(filePath, name))
+	req, err := uploadFileRequest(filepath.Join(filePath))
 	if err != nil {
 		sentry.CaptureException(err)
 		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
