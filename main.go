@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -320,11 +321,25 @@ func listInstances() {
 				if name != ".localCache" {
 					pterm.Info.Println("found instance: ", name)
 					var i Instance
+					iJsonStat, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
+					if err != nil {
+						pterm.Error.Println("Error getting instance.json file stat:", err)
+					}
 					data, err := os.ReadFile(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
 						sentry.CaptureException(err)
 						pterm.Error.Println("Error reading instance.json:", err)
 						pterm.Debug.Println("JSON data:", string(data))
+						filesToUpload = append(filesToUpload, FilesToUploadStruct{File: iJsonStat, Path: path.Join(ftbApp.Settings.InstanceLocation, name, iJsonStat.Name())})
+					} else {
+						pterm.Info.Println("Name:", i.Name)
+						pterm.Info.Println("Version:", i.Version)
+						pterm.Info.Println("Version ID:", i.VersionID)
+						pterm.Info.Println("Memory:", i.Memory)
+						pterm.Info.Println(fmt.Sprintf("Min/Rec Memory: %d/%d", i.MinMemory, i.RecMemory))
+						pterm.Info.Println("Custom Args:", i.JvmArgs)
+						pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
+						pterm.Info.Println("Is Modified:", i.IsModified)
 					}
 					pterm.Info.Println("Name:", i.Name)
 					pterm.Info.Println("Version:", i.Version)
@@ -339,7 +354,8 @@ func listInstances() {
 					for _, baseFile := range baseFiles {
 						if strings.HasPrefix(baseFile.Name(), "hs_err_") {
 							pterm.Debug.Println("Found java segfault log:", baseFile.Name())
-							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: baseFile, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
+							bfInfo, _ := baseFile.Info()
+							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: bfInfo, Path: path.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
 						}
 					}
 
@@ -359,7 +375,7 @@ func listInstances() {
 										pterm.Error.Println("Error getting file info:", err)
 									}
 									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
-									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: file, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name())})
+									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: fInfo, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name())})
 								}
 							}
 						}

@@ -93,7 +93,7 @@ type (
 	}
 
 	FilesToUploadStruct struct {
-		File os.DirEntry
+		File os.FileInfo
 		Path string
 	}
 
