@@ -309,3 +309,45 @@ func logToConsole(b bool) {
 		pterm.SetDefaultOutput(logFile)
 	}
 }
+
+func doesBinExist() {
+	defer sentry.Recover()
+	binExists := checkFilePathExistsSpinner("Minecraft bin directory", filepath.Join(ftbApp.InstallLocation, "bin"))
+	if binExists {
+		ftbApp.Structure.Bin.Exists = true
+	}
+}
+
+func runNetworkChecks() {
+	for url, checks := range checkRequestsURLs {
+		client := &http.Client{}
+		req, err := http.NewRequest(checks.method, url, nil)
+		if err != nil {
+			pterm.Error.Println("Error creating request to %s\n%s", url, err.Error())
+			continue
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			pterm.Error.Println("Error making request to %s\n%s", url, err.Error())
+			continue
+		}
+
+		// DO checks
+		if resp.StatusCode != checks.expectedStatusCode {
+			pterm.Warning.Printfln("%s returned unexpected status code, expected %d got %d (%s)", url, checks.expectedStatusCode, resp.StatusCode, resp.Status)
+			continue
+		}
+		if checks.validateResponse {
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				pterm.Error.Println("Error reading response body\n", err)
+				continue
+			}
+			if string(body) != checks.expectedReponse {
+				pterm.Warning.Printfln("%s did not match expected response\n%s", url, string(body))
+				continue
+			}
+		}
+		pterm.Success.Printfln("%s returned expected results", url)
+	}
+}
