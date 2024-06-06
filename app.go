@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 )
 
 func runAppChecks() {
@@ -133,38 +132,6 @@ func listInstances() {
 					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
 					pterm.Info.Println("Is Modified:", i.IsModified)
 
-					baseFiles, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name))
-					for _, baseFile := range baseFiles {
-						if strings.HasPrefix(baseFile.Name(), "hs_err_") {
-							pterm.Debug.Println("Found java segfault log:", baseFile.Name())
-							bfInfo, _ := baseFile.Info()
-							filesToUpload = append(filesToUpload, FilesToUploadStruct{File: bfInfo, Path: path.Join(ftbApp.Settings.InstanceLocation, name, baseFile.Name())})
-						}
-					}
-
-					logFolderExists := checkFilePathExistsSpinner(name+" logs folder", filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
-					if logFolderExists {
-						files, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
-						if err != nil {
-							pterm.Error.Println("Error getting file list at:", filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
-						} else {
-							for _, file := range files {
-								if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" {
-									pterm.Debug.Println("Found log file:", file.Name())
-									fInfo, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
-									if err != nil {
-										pterm.Error.Println("Error getting file info:", err)
-									}
-									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
-									filesToUpload = append(filesToUpload, FilesToUploadStruct{File: fInfo, Path: filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name())})
-								}
-							}
-						}
-					}
-					validUuid := re.Find([]byte(name))
-					if validUuid == nil {
-						pterm.Error.Println(name, " instance name: invalid uuid")
-					}
 					_, err = validateJson(name+" instance.json", filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
 						pterm.Error.Println("instance.json failed to validate")

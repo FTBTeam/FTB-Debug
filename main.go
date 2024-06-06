@@ -23,7 +23,6 @@ var (
 	logMw         io.Writer
 	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	betaApp       *bool
 	cli           *bool
 	GitCommit     string
 	filesToUpload []FilesToUploadStruct
@@ -33,14 +32,9 @@ var (
 func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
-	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
 	cli = flag.Bool("cli", false, "Only output the support code in console")
 	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
-
-	if *betaApp {
-		owUID = "nelapelmednbnaigieobbdgbinpgcgkfmmdjembg"
-	}
 
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
@@ -73,7 +67,7 @@ func main() {
 		putils.LettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
 		putils.LettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
 	pterm.DefaultCenter.Println(logo)
-	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "1.0.1", GitCommit, time.Now().UTC().Format(time.RFC1123)))
+	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "1.1.0", GitCommit, time.Now().UTC().Format(time.RFC1123)))
 	pterm.Debug.Println("Verbose logging enabled")
 
 	pterm.DefaultSection.Println("System Information")
@@ -153,13 +147,9 @@ func uploadFiles() {
 		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "debug.log")
 	}
 
-	if !*betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
+	if runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "index.html.log"), "index.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "background.html.log"), "background.html.log")
 		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "chat.html.log"), "chat.html.log")
-	} else if *betaApp && runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview")) {
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "index.html.log"), "index.html.log")
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "background.html.log"), "background.html.log")
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App Preview", "chat.html.log"), "chat.html.log")
 	}
 }
