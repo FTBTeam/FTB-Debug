@@ -53,6 +53,18 @@ var (
 			expectedStatusCode: http.StatusOK,
 			expectedReponse:    "",
 		},
+		"https://api.feed-the-beast.com/": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusNotFound,
+			expectedReponse:    "",
+		},
+		"https://meta.feed-the-beast.com/v1/health": {
+			method:             "HEAD",
+			validateResponse:   false,
+			expectedStatusCode: http.StatusOK,
+			expectedReponse:    "",
+		},
 	}
 )
 
