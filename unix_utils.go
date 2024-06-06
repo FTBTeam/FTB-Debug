@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/layeh/asar"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/process"
@@ -19,7 +18,6 @@ import (
 )
 
 func getSysInfo() (oSystem string, err error) {
-	defer sentry.Recover()
 	switch runtime.GOOS {
 	case "linux":
 		out, err := exec.Command("hostnamectl").Output()
@@ -52,7 +50,6 @@ func getSysInfo() (oSystem string, err error) {
 }
 
 func locateApp() bool {
-	defer sentry.Recover()
 	if runtime.GOOS == "darwin" {
 		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
 			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
@@ -70,14 +67,12 @@ func locateApp() bool {
 			return false
 		}
 	} else {
-		sentry.CaptureException(errors.New("Unable to determine OS"))
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
 		return false
 	}
 }
 
 func getAppVersion() {
-	defer sentry.Recover()
 	ftbApp.AppVersion = "Electron"
 	var appPath string
 	if runtime.GOOS == "darwin" {
@@ -96,7 +91,6 @@ func getAppVersion() {
 	} else if runtime.GOOS == "linux" {
 		appPath = filepath.Join(ftbApp.User.HomeDir, "FTBA", "bin", "resources", "app.asar")
 	} else {
-		sentry.CaptureException(errors.New("unable to determine OS"))
 		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
 		ftbApp.JarVersion = "N/A"
 		ftbApp.WebVersion = "N/A"
@@ -105,7 +99,6 @@ func getAppVersion() {
 	}
 	f, err := os.Open(appPath)
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println(err)
 		return
 	}
@@ -113,7 +106,6 @@ func getAppVersion() {
 
 	archive, err := asar.Decode(f)
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println(err)
 		return
 	}
@@ -126,7 +118,6 @@ func getAppVersion() {
 	var versionJson VersionJson
 	err = json.Unmarshal(versionRaw.Bytes(), &versionJson)
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println("JSON unmarshal error")
 		return
 	}
@@ -136,7 +127,6 @@ func getAppVersion() {
 }
 
 func getFTBProcess() {
-	defer sentry.Recover()
 	processes, err := process.Processes()
 	if err != nil {
 		pterm.Error.Println("Error getting processes\n", err)

@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/process"
@@ -26,13 +25,11 @@ type (
 
 // TODO implement getting app version from overwolf
 func getAppVersion() {
-	defer sentry.Recover()
 	var rawVersions []string
 	appLocal, _ := os.UserCacheDir()
 	overwolfDIR := filepath.Join(appLocal, "Overwolf", "Extensions", owUID)
 	files, err := os.ReadDir(overwolfDIR)
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println("Error while reading Overwolf versions")
 		return
 	}
@@ -55,7 +52,6 @@ func getAppVersion() {
 	jsonFile, err := os.Open(filepath.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
 	// if we os.Open returns an error then handle it
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println("Error opening version.json:", err)
 	}
 	defer jsonFile.Close()
@@ -68,7 +64,6 @@ func getAppVersion() {
 }
 
 func getSysInfo() (oSystem string, err error) {
-	defer sentry.Recover()
 	var dst []Win32_OperatingSystem
 
 	q := wmi.CreateQuery(&dst, "")
@@ -81,7 +76,6 @@ func getSysInfo() (oSystem string, err error) {
 }
 
 func locateApp() bool {
-	defer sentry.Recover()
 	if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
 		ftbApp.InstallLocation = filepath.Join(os.Getenv("localappdata"), ".ftba")
 		return true
@@ -95,7 +89,6 @@ func locateApp() bool {
 }
 
 func getFTBProcess() {
-	defer sentry.Recover()
 	processes, err := process.Processes()
 	if err != nil {
 		pterm.Error.Println("Error getting processes\n", err)

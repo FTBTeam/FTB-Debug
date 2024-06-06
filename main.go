@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"github.com/Gaz492/haste"
 	"github.com/eiannone/keyboard"
-	"github.com/getsentry/sentry-go"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
 	"io"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,7 +31,6 @@ var (
 )
 
 func init() {
-	defer sentry.Recover()
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	betaApp = flag.Bool("beta", false, "Use beta version of FTB")
@@ -60,27 +57,10 @@ func init() {
 }
 
 func main() {
-	defer sentry.Recover()
 	if GitCommit == "" {
 		GitCommit = "Dev"
 	}
 
-	err := sentry.Init(sentry.ClientOptions{
-		// Either set your DSN here or set the SENTRY_DSN environment variable.
-		Dsn: "https://50d1f640c19c4a4d84297643f695d5a7@sentry.creeperhost.net/11",
-		// Either set environment and release here or set the SENTRY_ENVIRONMENT
-		// and SENTRY_RELEASE environment variables.
-		Environment: "",
-		Release:     fmt.Sprintf("ftb-debug-%s", GitCommit),
-		// Enable printing of SDK debug messages.
-		// Useful when getting started or trying to figure something out.
-		Debug: false,
-	})
-	if err != nil {
-		log.Fatalf("sentry.Init: %s", err)
-	}
-
-	defer sentry.Flush(2 * time.Second)
 	defer cleanup(logFile)
 	if *cli {
 		logToConsole(false)
@@ -105,7 +85,6 @@ func main() {
 	pterm.DefaultSection.Println("FTB App Checks")
 	usr, err := user.Current()
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println("Failed to get users home directory")
 	}
 	ftbApp.User = usr
@@ -127,13 +106,11 @@ func main() {
 
 	tUpload, err := os.ReadFile(logFile.Name())
 	if err != nil {
-		sentry.CaptureException(err)
 		pterm.Error.Println("Failed to upload log file", logFile.Name())
 		pterm.Error.Println(err)
 	} else {
 		resp, err := hasteClient.UploadBytes(tUpload)
 		if err != nil {
-			sentry.CaptureException(err)
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
@@ -163,7 +140,6 @@ func main() {
 }
 
 func uploadFiles() {
-	defer sentry.Recover()
 	appLocal, _ := os.UserCacheDir()
 	hasteClient = haste.NewHaste("https://pste.ch")
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/pterm/pterm"
 	"os"
 	"path"
@@ -29,7 +28,6 @@ func runAppChecks() {
 		//TODO Add instance checking and settings file validation
 		err := loadAppSettings()
 		if err != nil {
-			sentry.CaptureException(err)
 			pterm.Error.Println("Failed to load app settings:\n", err)
 		} else {
 			pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
@@ -45,7 +43,6 @@ func runAppChecks() {
 }
 
 func loadAppSettings() error {
-	defer sentry.Recover()
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
@@ -53,12 +50,10 @@ func loadAppSettings() error {
 		if doesAppSettingsExist {
 			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 			if err != nil {
-				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading settings.json:", err)
 			} else {
 				settingsFile, err := os.Stat(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 				if err != nil {
-					sentry.CaptureException(err)
 					pterm.Error.Println("Error getting settings.json stat:", err)
 				} else {
 					filesToUpload = append(filesToUpload, FilesToUploadStruct{
@@ -70,7 +65,6 @@ func loadAppSettings() error {
 		} else {
 			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "app_settings.json"))
 			if err != nil {
-				sentry.CaptureException(err)
 				pterm.Error.Println("Error reading app_settings.json:", err)
 				return errors.New("error reading app_settings.json")
 			}
@@ -79,7 +73,6 @@ func loadAppSettings() error {
 		if doesVersionsManifestExist {
 			vManifest, err := os.Stat(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"))
 			if err != nil {
-				sentry.CaptureException(err)
 				pterm.Error.Println("Error getting file stat for version_manifest.json:", err)
 			}
 			filesToUpload = append(filesToUpload, FilesToUploadStruct{
@@ -91,7 +84,6 @@ func loadAppSettings() error {
 
 		var i AppSettings
 		if err := json.Unmarshal(appSettings, &i); err != nil {
-			sentry.CaptureException(err)
 			pterm.Error.Println("Error reading app settings:", err)
 			pterm.Debug.Println("JSON data:", string(appSettings))
 			return err
@@ -104,7 +96,6 @@ func loadAppSettings() error {
 }
 
 func listInstances() {
-	defer sentry.Recover()
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
@@ -120,7 +111,6 @@ func listInstances() {
 					}
 					data, err := os.ReadFile(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
-						sentry.CaptureException(err)
 						pterm.Error.Println("Error reading instance.json:", err)
 						pterm.Debug.Println("JSON data:", string(data))
 						filesToUpload = append(filesToUpload, FilesToUploadStruct{File: iJsonStat, Path: path.Join(ftbApp.Settings.InstanceLocation, name, iJsonStat.Name())})
@@ -156,7 +146,6 @@ func listInstances() {
 					if logFolderExists {
 						files, err := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						if err != nil {
-							sentry.CaptureException(err)
 							pterm.Error.Println("Error getting file list at:", filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
 						} else {
 							for _, file := range files {
@@ -164,7 +153,6 @@ func listInstances() {
 									pterm.Debug.Println("Found log file:", file.Name())
 									fInfo, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs", file.Name()))
 									if err != nil {
-										sentry.CaptureException(err)
 										pterm.Error.Println("Error getting file info:", err)
 									}
 									pterm.Info.Println(file.Name(), "last modified:", fInfo.ModTime().Format("02/01/2006 15:04:05"))
@@ -179,7 +167,6 @@ func listInstances() {
 					}
 					_, err = validateJson(name+" instance.json", filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
-						sentry.CaptureException(err)
 						pterm.Error.Println("instance.json failed to validate")
 					}
 				}
