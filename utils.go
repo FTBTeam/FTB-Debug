@@ -126,7 +126,13 @@ func getOSInfo() {
 	} else {
 		pterm.Info.Println(fmt.Sprintf("OS: %s", runtime.GOOS))
 	}
-	pterm.Info.Println(fmt.Sprintf("CPU: %s (%s)", cpuInfo[0].ModelName, cpuInfo[0].VendorID))
+
+	if len(cpuInfo) > 0 {
+		pterm.Info.Println(fmt.Sprintf("CPU: %s (%s)", cpuInfo[0].ModelName, cpuInfo[0].VendorID))
+	} else {
+		pterm.Info.Println("CPU: Unable to calculate")
+	}
+
 	pterm.Info.Println(fmt.Sprintf("Memory: %s / %s (%.2f%% used)", ByteCountIEC(int64(memInfo.Used)), ByteCountIEC(int64(memInfo.Total)), memInfo.UsedPercent))
 
 	javaHome := os.Getenv("JAVA_HOME")
