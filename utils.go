@@ -11,13 +11,13 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
+	"strconv"
+	"time"
 )
 
 var (
@@ -165,9 +165,14 @@ func checkFilePath(filePath string) (string, bool) {
 	}
 }
 
-func newUploadFile(filePath string, fileName string) {
+func uploadFile(filePath string, comment string) {
 	pterm.Debug.Println(filePath)
+	fileName := filepath.Base(filePath)
 	data, err := os.ReadFile(filePath)
+	if err != nil {
+		pterm.Error.Printfln("Uploading %s: failed to open file\n%s", comment, err)
+		return
+	}
 	if fileName == "launcher_profiles.json" {
 		data, err = sanitizeProfile(data)
 		if err != nil {
@@ -183,70 +188,36 @@ func newUploadFile(filePath string, fileName string) {
 	} else {
 		data = sanitizeLogs(data)
 	}
+	r, err := uploadRequest(data)
 	if err != nil {
-		pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to open file\n%v", fileName, err))
-	} else {
-		resp, err := hasteClient.UploadBytes(data)
-		if err != nil {
-			pterm.Warning.Println(fmt.Sprintf("Uploading %s: failed to upload - %s", fileName, err.Error()))
-			if err.Error() == "file too large" {
-				pterm.Info.Println("Trying again with transfer.sh")
-				uploadBigFile(filePath, fileName)
-			}
-		} else {
-			pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", fileName, resp.GetLink(hasteClient)))
-		}
+		pterm.Error.Printfln("Uploading %s: failed to upload\n%s", comment, err)
+		return
 	}
+	pterm.Info.Printfln("Uploaded %s: %s", comment, r.Data.ID)
 }
 
-func uploadBigFile(filePath string, name string) {
-	req, err := uploadFileRequest(filepath.Join(filePath))
-	if err != nil {
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
-		pterm.Error.Println(err)
-	}
-
+func uploadRequest(data []byte) (PsteMeResp, error) {
+	// http put request to https://pste.me/v1/paste
 	client := &http.Client{}
+	req, err := http.NewRequest("PUT", "https://pste.me/v1/paste", bytes.NewBuffer(data))
+	if err != nil {
+		return PsteMeResp{}, err
+	}
+	req.URL.Query().Add("expires_at", strconv.FormatInt(time.Now().Add(time.Hour*1440).Unix(), 10))
 	resp, err := client.Do(req)
 	if err != nil {
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
-		pterm.Error.Println(err)
+		return PsteMeResp{}, err
 	}
 	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
-		pterm.Error.Println(fmt.Sprintf("Uploading %s: failed to upload", name))
-		pterm.Error.Println(err)
-	} else {
-		pterm.Success.Println(fmt.Sprintf("Uploaded %s: %s", name, strings.TrimSuffix(string(body), "\n")))
+		return PsteMeResp{}, err
 	}
-
-}
-
-func uploadFileRequest(path string) (*http.Request, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
+	var r PsteMeResp
+	if err := json.Unmarshal(content, &r); err != nil {
+		return PsteMeResp{}, err
 	}
-	defer file.Close()
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("upload", filepath.Base(path))
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(part, file)
-
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", "https://transfer.sh", body)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	return req, err
+	return r, nil
 }
 
 func sanitizeProfile(data []byte) ([]byte, error) {

@@ -79,7 +79,7 @@ func loadAppSettings() error {
 				Path: filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"),
 			})
 		}
-		newUploadFile(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"), "version_manifest.json")
+		uploadFile(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"), "version_manifest.json")
 
 		var i AppSettings
 		if err := json.Unmarshal(appSettings, &i); err != nil {

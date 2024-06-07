@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 	"time"
 )
 
@@ -33,7 +32,6 @@ func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	cli = flag.Bool("cli", false, "Only output the support code in console")
-	hasteClient = haste.NewHaste("https://pste.ch")
 	flag.Parse()
 
 	if *verboseLogging {
@@ -103,12 +101,13 @@ func main() {
 		pterm.Error.Println("Failed to upload log file", logFile.Name())
 		pterm.Error.Println(err)
 	} else {
-		resp, err := hasteClient.UploadBytes(tUpload)
+		resp, err := uploadRequest(tUpload)
 		if err != nil {
 			pterm.Error.Println("Failed to upload support file...")
 			pterm.Error.Println(err)
 		} else {
-			pterm.DefaultBasicText.WithStyle(pterm.NewStyle(pterm.Bold)).Println(fmt.Sprintf("Please provide this code to support: FTB-DBG%s", strings.ToUpper(resp.Key)))
+			codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
+			pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", resp.Data.ID))
 		}
 	}
 
@@ -139,17 +138,41 @@ func uploadFiles() {
 
 	for _, file := range filesToUpload {
 		pterm.Debug.Println("[fileToUpload] Uploading file:", file.File.Name())
-		newUploadFile(file.Path, file.File.Name())
+		uploadFile(file.Path, file.File.Name())
 	}
 
 	if appLocated {
-		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "latest.log"), "latest.log")
-		newUploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "debug.log")
+		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "latest.log"), "App latest.log")
+		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "App debug.log")
+
+		electronLog := filepath.Join(ftbApp.InstallLocation, "logs", "ftb-app-electron.log")
+		_, exists := checkFilePath(electronLog)
+		if exists {
+			uploadFile(electronLog, "ftb-app-electron.log")
+		}
+
+		frontendLog := filepath.Join(ftbApp.InstallLocation, "logs", "ftb-app-frontend.log")
+		_, exists = checkFilePath(frontendLog)
+		if exists {
+			uploadFile(frontendLog, "ftb-app-frontend.log")
+		}
+
+		installerLog := filepath.Join(ftbApp.InstallLocation, "logs", "ftb-app-installer.log")
+		_, exists = checkFilePath(installerLog)
+		if exists {
+			uploadFile(installerLog, "ftb-app-installer.log")
+		}
+
+		runtimeInstallations := filepath.Join(ftbApp.InstallLocation, "bin", "runtime", "installations.json")
+		_, exists = checkFilePath(runtimeInstallations)
+		if exists {
+			uploadFile(runtimeInstallations, "runtime installations.json")
+		}
 	}
 
 	if runtime.GOOS == "windows" && checkFilePathExistsSpinner("Overwolf Logs", filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App")) {
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "index.html.log"), "index.html.log")
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "background.html.log"), "background.html.log")
-		newUploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "chat.html.log"), "chat.html.log")
+		uploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "index.html.log"), "Overwolf index.html.log")
+		uploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "background.html.log"), "Overwolf background.html.log")
+		uploadFile(filepath.Join(appLocal, "Overwolf", "Log", "Apps", "FTB App", "chat.html.log"), "Overwolf chat.html.log")
 	}
 }

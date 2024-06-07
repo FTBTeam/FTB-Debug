@@ -103,4 +103,15 @@ type (
 		expectedStatusCode int
 		expectedReponse    string
 	}
+
+	// Pste.me response
+	PsteMeResp struct {
+		Data PsteMeData `json:"data"`
+		Ok   bool       `json:"ok"`
+	}
+	PsteMeData struct {
+		DeleteID string `json:"delete_id"`
+		ID       string `json:"id"`
+		Message  string `json:"message"`
+	}
 )
