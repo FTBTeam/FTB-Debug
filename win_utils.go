@@ -98,9 +98,13 @@ func getFTBProcess() {
 	for _, p := range processes {
 		n, err := p.Name()
 		if err != nil {
-			pterm.Warning.Println("Error getting process name\n", err)
+			//pterm.Warning.Println("Error getting process name\n", err)
+			continue
 		}
 		if n != "" && strings.ToLower(n) == "overwolf.exe" {
+			p.Kill()
+		}
+		if n != "" && strings.ToLower(n) == "ftb electron app.exe" {
 			p.Kill()
 		}
 	}

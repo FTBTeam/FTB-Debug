@@ -142,5 +142,8 @@ func getFTBProcess() {
 		if n != "" && strings.ToLower(n) == "ftb-app" {
 			p.Kill()
 		}
+		if n != "" && strings.ToLower(n) == "ftb electron app" {
+			p.Kill()
+		}
 	}
 }
