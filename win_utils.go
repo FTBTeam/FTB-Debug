@@ -49,7 +49,7 @@ func getAppVersion() {
 	pterm.Debug.Println("Found versions:", versions)
 	ftbApp.AppVersion = versions[0].String()
 
-	jsonFile, err := os.Open(filepath.Join(overwolfDIR, ftbApp.AppVersion, "version.json"))
+	jsonFile, err := os.Open(filepath.Join(overwolfDIR, ftbApp.AppVersion, "meta.json"))
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		pterm.Error.Println("Error opening version.json:", err)

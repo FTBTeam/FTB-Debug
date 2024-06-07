@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 func runAppChecks() {
@@ -20,8 +21,7 @@ func runAppChecks() {
 		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
 		getAppVersion()
 		pterm.Info.Println("App version:", ftbApp.AppVersion)
-		pterm.Info.Println("Backend version:", ftbApp.JarVersion)
-		pterm.Info.Println("Web version:", ftbApp.WebVersion)
+		pterm.Info.Println("App release date:", time.Unix(int64(ftbApp.Released), 0))
 		pterm.Info.Println("Branch:", ftbApp.AppBranch)
 
 		//TODO Add instance checking and settings file validation

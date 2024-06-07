@@ -11,9 +11,8 @@ type (
 		OWLocation      string
 		InstallLocation string
 		AppVersion      string
-		JarVersion      string
-		WebVersion      string
 		AppBranch       string
+		Released        int
 		Structure       AppStructure
 		Settings        AppSettings
 	}
@@ -86,12 +85,6 @@ type (
 		//Profile bool
 	}
 
-	VersionJson struct {
-		JarVersion string `json:"jarVersion"`
-		WebVersion string `json:"webVersion"`
-		Branch     string `json:"branch"`
-	}
-
 	FilesToUploadStruct struct {
 		File os.FileInfo
 		Path string
@@ -113,5 +106,23 @@ type (
 		DeleteID string `json:"delete_id"`
 		ID       string `json:"id"`
 		Message  string `json:"message"`
+	}
+
+	// App meta.json
+	AppMeta struct {
+		AppVersion string         `json:"appVersion"`
+		Commit     string         `json:"commit"`
+		Branch     string         `json:"branch"`
+		Released   int            `json:"released"`
+		Runtime    AppMetaRuntime `json:"runtime"`
+	}
+	AppMetaJvmArgs struct {
+		Value string `json:"value"`
+	}
+	AppMetaRuntime struct {
+		Version string           `json:"version"`
+		Jar     string           `json:"jar"`
+		Env     []interface{}    `json:"env"`
+		JvmArgs []AppMetaJvmArgs `json:"jvmArgs"`
 	}
 )

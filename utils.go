@@ -317,3 +317,42 @@ func runNetworkChecks() {
 		pterm.Success.Printfln("%s returned expected results", url)
 	}
 }
+
+func getAppVersion() {
+	var metaPath string
+	if runtime.GOOS == "windows" {
+		// TODO: Implement windows version
+	}
+	if runtime.GOOS == "darwin" {
+		metaPath = filepath.Join(ftbApp.User.HomeDir, "Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
+		installExists := checkFilePathExistsSpinner("App install (User home)", metaPath)
+		if !installExists {
+			metaPath = filepath.Join("/Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
+			installExists = checkFilePathExistsSpinner("App install", metaPath)
+			if !installExists {
+				ftbApp.AppVersion = "N/A"
+				ftbApp.AppBranch = "N/A"
+				ftbApp.Released = 0000000
+				return
+			}
+		}
+	}
+	if runtime.GOOS == "linux" {
+
+	}
+
+	// Read json file
+	metaRaw, err := os.ReadFile(metaPath)
+	if err != nil {
+		pterm.Error.Println("Error reading meta.json:", err)
+		return
+	}
+	var metaJson AppMeta
+	if err := json.Unmarshal(metaRaw, &metaJson); err != nil {
+		pterm.Error.Println("Error unmarshaling meta.json:", err)
+		return
+	}
+	ftbApp.AppVersion = metaJson.AppVersion
+	ftbApp.AppBranch = metaJson.Branch
+	ftbApp.Released = metaJson.Released
+}
