@@ -146,8 +146,8 @@ func uploadFiles() {
 	}
 
 	if appLocated {
-		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "latest.log"), "App latest.log")
-		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "App debug.log")
+		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "latest.log"), "latest.log")
+		uploadFile(filepath.Join(ftbApp.InstallLocation, "logs", "debug.log"), "debug.log")
 
 		electronLog := filepath.Join(ftbApp.InstallLocation, "logs", "ftb-app-electron.log")
 		_, exists := checkFilePath(electronLog)
@@ -170,7 +170,7 @@ func uploadFiles() {
 		runtimeInstallations := filepath.Join(ftbApp.InstallLocation, "bin", "runtime", "installations.json")
 		_, exists = checkFilePath(runtimeInstallations)
 		if exists {
-			uploadFile(runtimeInstallations, "runtime installations.json")
+			uploadFile(runtimeInstallations, "installations.json")
 		}
 	}
 

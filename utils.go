@@ -193,7 +193,7 @@ func uploadFile(filePath string, comment string) {
 		pterm.Error.Printfln("Uploading %s: failed to upload\n%s", comment, err)
 		return
 	}
-	pterm.Info.Printfln("Uploaded %s: %s", comment, r.Data.ID)
+	pterm.Info.Printfln("Uploaded [%s#%s]", r.Data.ID, comment)
 }
 
 func uploadRequest(data []byte) (PsteMeResp, error) {
