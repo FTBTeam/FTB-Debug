@@ -32,10 +32,14 @@ func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
 	cli = flag.Bool("cli", false, "Only output the support code in console")
+	noColours := flag.Bool("no-colours", false, "Disable colours in output")
 	flag.Parse()
 
 	if *verboseLogging {
 		pterm.EnableDebugMessages()
+	}
+	if *noColours {
+		pterm.DisableColor()
 	}
 	logFile, err = os.CreateTemp("", "ftb-debug-log")
 	if err != nil {
