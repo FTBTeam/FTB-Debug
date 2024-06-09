@@ -75,19 +75,6 @@ func getSysInfo() (oSystem string, err error) {
 	return oSystem, nil
 }
 
-func locateApp() bool {
-	if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
-		ftbApp.InstallLocation = filepath.Join(os.Getenv("localappdata"), ".ftba")
-		return true
-	} else if checkFilePathExistsSpinner("FTB App directory (home)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
-		ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
-		return true
-	} else {
-		pterm.Error.Println("Unable to find app install")
-		return false
-	}
-}
-
 func getFTBProcess() {
 	processes, err := process.Processes()
 	if err != nil {

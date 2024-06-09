@@ -91,10 +91,50 @@ type (
 	}
 
 	CheckURLStruct struct {
-		method             string
-		validateResponse   bool
-		expectedStatusCode int
-		expectedReponse    string
+		Method             string
+		ValidateResponse   bool
+		ExpectedStatusCode int
+		ExpectedReponse    string
+	}
+
+	NetworkCheck struct {
+		URL     string
+		Success bool
+		Error   bool
+		Status  string
+	}
+
+	// Manifest
+	Manifest struct {
+		Version                 string            `json:"version,omitempty"`
+		MetaDetails             MetaDetails       `json:"meta,omitempty"`
+		AppDetails              AppMeta           `json:"app,omitempty"`
+		AppLogs                 map[string]string `json:"logs,omitempty"`
+		ProviderInstanceMapping []Instances       `json:"providerInstanceMapping,omitempty"`
+		InstanceLogs            []InstanceLogs    `json:"instanceLogs,omitempty"`
+		NetworkChecks           []NetworkCheck    `json:"networkChecks,omitempty"`
+	}
+	MetaDetails struct {
+		InstanceCount     int    `json:"instanceCount,omitempty"`
+		CloudInstances    int    `json:"cloudInstances,omitempty"`
+		Today             string `json:"today,omitempty"`
+		Time              int64  `json:"time,omitempty"`
+		AddedAccounts     int    `json:"addedAccounts,omitempty"`
+		HasActiveAccounts bool   `json:"hasActiveAccounts,omitempty"`
+	}
+	Instances struct {
+		Name        string `json:"name,omitempty"`
+		PackType    int    `json:"packType,omitempty"`
+		PackId      int    `json:"packId,omitempty"`
+		PackVersion int    `json:"packVersion,omitempty"`
+	}
+	InstanceLogs struct {
+		Created   int64             `json:"created,omitempty"`
+		Name      string            `json:"name,omitempty"`
+		UUID      string            `json:"uuid,omitempty"`
+		McVersion string            `json:"mcVersion,omitempty"`
+		ModLoader string            `json:"modLoader,omitempty"`
+		Logs      map[string]string `json:"logs,omitempty"`
 	}
 
 	// Pste.me response

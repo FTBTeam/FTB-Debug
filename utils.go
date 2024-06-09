@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Gaz492/haste"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -18,54 +17,6 @@ import (
 	"runtime"
 	"strconv"
 	"time"
-)
-
-var (
-	hasteClient       *haste.Haste
-	checkRequestsURLs = map[string]CheckURLStruct{
-		"https://api.modpacks.ch/public/api/ping": {
-			method:             "GET",
-			validateResponse:   true,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
-		},
-		"https://api.creeper.host/api/health": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "",
-		},
-		"https://maven.creeperhost.net": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "",
-		},
-		"https://maven.fabricmc.net": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "",
-		},
-		"https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "",
-		},
-		"https://api.feed-the-beast.com/": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusNotFound,
-			expectedReponse:    "",
-		},
-		"https://meta.feed-the-beast.com/v1/health": {
-			method:             "HEAD",
-			validateResponse:   false,
-			expectedStatusCode: http.StatusOK,
-			expectedReponse:    "",
-		},
-	}
 )
 
 func cleanup(logFile *os.File) {
@@ -284,75 +235,68 @@ func doesBinExist() {
 	}
 }
 
-func runNetworkChecks() {
+func locateFTBAFolder() (bool, error) {
+	if runtime.GOOS == "windows" {
+		if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(os.Getenv("localappdata"), ".ftba")
+			return true, nil
+		} else if checkFilePathExistsSpinner("FTB App directory (home)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
+			return true, nil
+		} else {
+			return false, errors.New("unable to find .ftba directory")
+		}
+	} else if runtime.GOOS == "darwin" {
+		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
+			return true, nil
+		} else {
+			return false, errors.New("unable to find .ftba directory")
+		}
+	} else if runtime.GOOS == "linux" {
+		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
+			return true, nil
+		} else {
+			return false, errors.New("unable to find .ftba directory")
+		}
+	} else {
+		return false, errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+	}
+}
+
+func runNetworkChecks() []NetworkCheck {
+	var nc []NetworkCheck
 	for url, checks := range checkRequestsURLs {
 		client := &http.Client{}
-		req, err := http.NewRequest(checks.method, url, nil)
+		req, err := http.NewRequest(checks.Method, url, nil)
 		if err != nil {
-			pterm.Error.Println("Error creating request to %s\n%s", url, err.Error())
+			nc = append(nc, NetworkCheck{URL: url, Success: false, Error: true, Status: fmt.Sprintf("Error creating request to %s\n%s", url, err.Error())})
 			continue
 		}
 		resp, err := client.Do(req)
 		if err != nil {
-			pterm.Error.Println("Error making request to %s\n%s", url, err.Error())
+			nc = append(nc, NetworkCheck{URL: url, Success: false, Error: true, Status: fmt.Sprintf("Error making request to %s\n%s", url, err.Error())})
 			continue
 		}
 
 		// DO checks
-		if resp.StatusCode != checks.expectedStatusCode {
-			pterm.Warning.Printfln("%s returned unexpected status code, expected %d got %d (%s)", url, checks.expectedStatusCode, resp.StatusCode, resp.Status)
+		if resp.StatusCode != checks.ExpectedStatusCode {
+			nc = append(nc, NetworkCheck{URL: url, Success: false, Error: false, Status: fmt.Sprintf("%s: Expected %d got %d (%s)", url, checks.ExpectedStatusCode, resp.StatusCode, resp.Status)})
 			continue
 		}
-		if checks.validateResponse {
+		if checks.ValidateResponse {
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				pterm.Error.Println("Error reading response body\n", err)
+				nc = append(nc, NetworkCheck{URL: url, Success: false, Error: true, Status: fmt.Sprintf("Error reading response body\n%s", err.Error())})
 				continue
 			}
-			if string(body) != checks.expectedReponse {
-				pterm.Warning.Printfln("%s did not match expected response\n%s", url, string(body))
+			if string(body) != checks.ExpectedReponse {
+				nc = append(nc, NetworkCheck{URL: url, Success: false, Error: false, Status: fmt.Sprintf("%s: Expected %s got %s", url, checks.ExpectedReponse, string(body))})
 				continue
 			}
 		}
-		pterm.Success.Printfln("%s returned expected results", url)
+		nc = append(nc, NetworkCheck{URL: url, Success: true, Error: false, Status: fmt.Sprintf("%s returned expected results", url)})
 	}
-}
-
-func getAppVersion() {
-	var metaPath string
-	if runtime.GOOS == "windows" {
-		// TODO: Implement windows version
-	}
-	if runtime.GOOS == "darwin" {
-		metaPath = filepath.Join(ftbApp.User.HomeDir, "Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
-		installExists := checkFilePathExistsSpinner("App install (User home)", metaPath)
-		if !installExists {
-			metaPath = filepath.Join("/Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
-			installExists = checkFilePathExistsSpinner("App install", metaPath)
-			if !installExists {
-				ftbApp.AppVersion = "N/A"
-				ftbApp.AppBranch = "N/A"
-				ftbApp.Released = 0000000
-				return
-			}
-		}
-	}
-	if runtime.GOOS == "linux" {
-
-	}
-
-	// Read json file
-	metaRaw, err := os.ReadFile(metaPath)
-	if err != nil {
-		pterm.Error.Println("Error reading meta.json:", err)
-		return
-	}
-	var metaJson AppMeta
-	if err := json.Unmarshal(metaRaw, &metaJson); err != nil {
-		pterm.Error.Println("Error unmarshaling meta.json:", err)
-		return
-	}
-	ftbApp.AppVersion = metaJson.AppVersion
-	ftbApp.AppBranch = metaJson.Branch
-	ftbApp.Released = metaJson.Released
+	return nc
 }

@@ -8,11 +8,16 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
 func runAppChecks() {
-	appLocated = locateApp()
+	appLocated, err := locateFTBAFolder()
+	if err != nil {
+		pterm.Error.Println("Error locating app:", err)
+		return
+	}
 	if appLocated {
 		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
 		// Validate Minecraft bin folder exists
@@ -142,4 +147,38 @@ func listInstances() {
 			}
 		}
 	}
+}
+
+// NEW STUFF HERE
+
+func getAppVersion() (AppMeta, error) {
+	var metaPath string
+	if runtime.GOOS == "windows" {
+		// TODO: Implement windows version
+	} else if runtime.GOOS == "darwin" {
+		metaPath = filepath.Join(ftbApp.User.HomeDir, "Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
+		installExists := checkFilePathExistsSpinner("App install (User home)", metaPath)
+		if !installExists {
+			metaPath = filepath.Join("/Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
+			installExists = checkFilePathExistsSpinner("App install", metaPath)
+			if !installExists {
+				return AppMeta{}, errors.New("app not found")
+			}
+		}
+	} else if runtime.GOOS == "linux" {
+
+	} else {
+		return AppMeta{}, errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+	}
+
+	// Read json file
+	metaRaw, err := os.ReadFile(metaPath)
+	if err != nil {
+		return AppMeta{}, err
+	}
+	var metaJson AppMeta
+	if err := json.Unmarshal(metaRaw, &metaJson); err != nil {
+		return AppMeta{}, err
+	}
+	return metaJson, nil
 }

@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/process"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -44,29 +42,6 @@ func getSysInfo() (oSystem string, err error) {
 		return "", nil
 	default:
 		return "", errors.New("unable to determine operating system")
-	}
-}
-
-func locateApp() bool {
-	if runtime.GOOS == "darwin" {
-		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
-			return true
-		} else {
-			pterm.Error.Println("Unable to find app install")
-			return false
-		}
-	} else if runtime.GOOS == "linux" {
-		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
-			return true
-		} else {
-			pterm.Error.Println("Unable to find app install")
-			return false
-		}
-	} else {
-		pterm.Error.Println("Could you let us know what operating system you are using so we can add our checks?")
-		return false
 	}
 }
 
