@@ -229,39 +229,59 @@ func logToConsole(b bool) {
 }
 
 func doesBinExist() {
-	binExists := checkFilePathExistsSpinner("Minecraft bin directory", filepath.Join(ftbApp.InstallLocation, "bin"))
+	binExists := checkFilePathExistsSpinner("App bin directory", filepath.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		ftbApp.Structure.Bin.Exists = true
 	}
 }
 
-func locateFTBAFolder() (bool, error) {
+func locateFTBApp() (string, error) {
+	if runtime.GOOS == "windows" {
+		if checkFilePathExistsSpinner("FTB App install (AppData)", windowsAppPath) {
+			return windowsAppPath, nil
+		} else {
+			return "", errors.New("unable to find .ftba directory")
+		}
+	} else if runtime.GOOS == "darwin" {
+		if checkFilePathExistsSpinner("FTB App location", macAppPath) {
+			return macAppPath, nil
+		} else {
+			return "", errors.New("unable to find .ftba directory")
+		}
+	} else if runtime.GOOS == "linux" {
+		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", linuxAppPath) {
+			return linuxAppPath, nil
+		} else {
+			return "", errors.New("unable to find .ftba directory")
+		}
+	} else {
+		return "", errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+	}
+}
+
+func locateFTBAFolder() (string, error) {
 	if runtime.GOOS == "windows" {
 		if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(os.Getenv("localappdata"), ".ftba")
-			return true, nil
+			return filepath.Join(os.Getenv("localappdata"), ".ftba"), nil
 		} else if checkFilePathExistsSpinner("FTB App directory (home)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
-			return true, nil
+			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
-			return false, errors.New("unable to find .ftba directory")
+			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "darwin" {
 		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")
-			return true, nil
+			return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba"), nil
 		} else {
-			return false, errors.New("unable to find .ftba directory")
+			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "linux" {
 		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
-			ftbApp.InstallLocation = filepath.Join(ftbApp.User.HomeDir, ".ftba")
-			return true, nil
+			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
-			return false, errors.New("unable to find .ftba directory")
+			return "", errors.New("unable to find .ftba directory")
 		}
 	} else {
-		return false, errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+		return "", errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
 	}
 }
 

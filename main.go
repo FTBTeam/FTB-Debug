@@ -8,6 +8,7 @@ import (
 	"github.com/pterm/pterm/putils"
 	"io"
 	"os"
+	"os/user"
 	"regexp"
 	"time"
 )
@@ -69,6 +70,14 @@ func main() {
 	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "2.0.0", GitCommit, time.Now().UTC().Format(time.RFC1123)))
 	pterm.Debug.Println("Verbose logging enabled")
 
+	pterm.DefaultHeader.Println("System Info")
+	getOSInfo()
+	usr, err := user.Current()
+	if err != nil {
+		pterm.Error.Println("Failed to get users home directory")
+	}
+	ftbApp.User = usr
+
 	pterm.DefaultHeader.Println("Running Network Checks")
 	nc := runNetworkChecks()
 	for _, n := range nc {
@@ -82,6 +91,7 @@ func main() {
 	}
 
 	pterm.DefaultHeader.Println("Running App Checks")
+	runAppChecks()
 
 	// Compile manifest
 	manifest.NetworkChecks = nc

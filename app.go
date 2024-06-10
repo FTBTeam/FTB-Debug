@@ -13,37 +13,41 @@ import (
 )
 
 func runAppChecks() {
-	appLocated, err := locateFTBAFolder()
+	ftbaPath, err := locateFTBAFolder()
 	if err != nil {
 		pterm.Error.Println("Error locating app:", err)
 		return
 	}
-	if appLocated {
-		pterm.DefaultSection.WithLevel(2).Println("Validating App structure")
-		// Validate Minecraft bin folder exists
-		doesBinExist()
-		pterm.DefaultSection.WithLevel(2).Println("App info")
-		pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
-		getAppVersion()
-		pterm.Info.Println("App version:", ftbApp.AppVersion)
-		pterm.Info.Println("App release date:", time.Unix(int64(ftbApp.Released), 0))
-		pterm.Info.Println("Branch:", ftbApp.AppBranch)
+	ftbApp.InstallLocation = ftbaPath
+	// Validate bin folder exists
+	doesBinExist()
 
-		//TODO Add instance checking and settings file validation
-		err := loadAppSettings()
-		if err != nil {
-			pterm.Error.Println("Failed to load app settings:\n", err)
-		} else {
-			pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
-			if ftbApp.Settings.Jvmargs != "" {
-				pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
-			}
+	pterm.DefaultSection.WithLevel(2).Println("App info")
+	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
+	appVerData, err := getAppVersion()
+	if err != nil {
+		pterm.Error.Println("Error getting app version:", err)
+		return
+	}
+	pterm.Info.Println("App version:", appVerData.AppVersion)
+	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
+	pterm.Info.Println("Branch:", appVerData.Branch)
 
+	//TODO Add instance checking and settings file validation
+	err = loadAppSettings()
+	if err != nil {
+		pterm.Error.Println("Failed to load app settings:\n", err)
+	} else {
+		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
+		if ftbApp.Settings.Jvmargs != "" {
+			pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
 		}
 
-		pterm.DefaultSection.Println("Check for instances")
-		listInstances()
 	}
+
+	pterm.DefaultSection.Println("Check for instances")
+	listInstances()
+
 }
 
 func loadAppSettings() error {
@@ -156,14 +160,10 @@ func getAppVersion() (AppMeta, error) {
 	if runtime.GOOS == "windows" {
 		// TODO: Implement windows version
 	} else if runtime.GOOS == "darwin" {
-		metaPath = filepath.Join(ftbApp.User.HomeDir, "Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
-		installExists := checkFilePathExistsSpinner("App install (User home)", metaPath)
+		metaPath = filepath.Join(macAppPath, "contents", "Resources", "meta.json")
+		installExists := checkFilePathExistsSpinner("App metadata", metaPath)
 		if !installExists {
-			metaPath = filepath.Join("/Applications", "FTB Electron App.app", "contents", "Resources", "meta.json")
-			installExists = checkFilePathExistsSpinner("App install", metaPath)
-			if !installExists {
-				return AppMeta{}, errors.New("app not found")
-			}
+			return AppMeta{}, errors.New("app meta not found")
 		}
 	} else if runtime.GOOS == "linux" {
 
