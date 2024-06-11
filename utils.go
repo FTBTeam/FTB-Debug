@@ -320,3 +320,12 @@ func runNetworkChecks() []NetworkCheck {
 	}
 	return nc
 }
+
+func isActiveProfileInProfiles(profiles Profiles) bool {
+	for _, profile := range profiles.Profiles {
+		if profile.UUID == profiles.ActiveProfile {
+			return true
+		}
+	}
+	return false
+}

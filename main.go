@@ -92,6 +92,12 @@ func main() {
 
 	pterm.DefaultHeader.Println("Running App Checks")
 	runAppChecks()
+	profiles, err := getProfiles()
+	if err != nil {
+		pterm.Error.Println("Failed to get profiles:", err)
+		return
+	}
+	hasActiveAccount := isActiveProfileInProfiles(profiles)
 
 	pterm.DefaultSection.WithLevel(2).Println("App info")
 	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
@@ -115,15 +121,13 @@ func main() {
 	manifest.Version = "2.0.1-Go"
 	manifest.MetaDetails = MetaDetails{
 		InstanceCount:     len(instances),
-		CloudInstances:    0, //todo
 		Today:             time.Now().UTC().Format(time.DateOnly),
 		Time:              time.Now().Unix(),
-		AddedAccounts:     0,     // todo
-		HasActiveAccounts: false, //todo
+		AddedAccounts:     len(profiles.Profiles),
+		HasActiveAccounts: hasActiveAccount,
 	}
 	manifest.AppDetails = AppDetails{
 		App:           appVerData.Commit,
-		Platform:      "TODO",
 		SharedVersion: appVerData.AppVersion,
 	}
 	manifest.NetworkChecks = nc

@@ -57,7 +57,10 @@ var (
 			ExpectedReponse:    "",
 		},
 	}
+
 	windowsAppPath = filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app")
-	linuxAppPath   = filepath.Join(os.Getenv("HOME"), ".ftb-app")
-	macAppPath     = filepath.Join("/Applications", "FTB Electron App.app")
+
+	linuxAppPath = filepath.Join(os.Getenv("HOME"), ".ftb-app")
+
+	macAppPath = filepath.Join("/Applications", "FTB Electron App.app")
 )

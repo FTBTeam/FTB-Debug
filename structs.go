@@ -116,7 +116,6 @@ type (
 	}
 	MetaDetails struct {
 		InstanceCount     int    `json:"instanceCount,omitempty"`
-		CloudInstances    int    `json:"cloudInstances,omitempty"`
 		Today             string `json:"today,omitempty"`
 		Time              int64  `json:"time,omitempty"`
 		AddedAccounts     int    `json:"addedAccounts,omitempty"`
@@ -124,7 +123,6 @@ type (
 	}
 	AppDetails struct {
 		App           string `json:"app,omitempty"`
-		Platform      string `json:"platform,omitempty"`
 		SharedVersion string `json:"sharedVersion,omitempty"`
 	}
 	Instances struct {
@@ -169,5 +167,15 @@ type (
 		Jar     string           `json:"jar"`
 		Env     []interface{}    `json:"env"`
 		JvmArgs []AppMetaJvmArgs `json:"jvmArgs"`
+	}
+
+	Profiles struct {
+		Version  string `json:"version"`
+		Profiles []struct {
+			UUID      string `json:"uuid"`
+			LastLogin int    `json:"lastLogin"`
+			Username  string `json:"username"`
+		} `json:"profiles"`
+		ActiveProfile string `json:"activeProfile"`
 	}
 )

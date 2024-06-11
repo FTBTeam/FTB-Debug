@@ -21,16 +21,10 @@ func runAppChecks() {
 	// Validate bin folder exists
 	doesBinExist()
 
-	//TODO Add instance checking and settings xfile validation
+	//TODO Add instance checking and settings file validation
 	err = loadAppSettings()
 	if err != nil {
 		pterm.Error.Println("Failed to load app settings:\n", err)
-	} else {
-		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
-		if ftbApp.Settings.Jvmargs != "" {
-			pterm.Info.Println("Custom Args: ", ftbApp.Settings.Jvmargs)
-		}
-
 	}
 }
 
@@ -88,8 +82,10 @@ func loadAppSettings() error {
 }
 
 func getInstances() (map[string]Instances, error) {
+
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
+		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
 		pIM := make(map[string]Instances)
 		for _, instance := range instances {
@@ -155,4 +151,21 @@ func getAppVersion() (AppMeta, error) {
 		return AppMeta{}, err
 	}
 	return metaJson, nil
+}
+
+func getProfiles() (Profiles, error) {
+	profilesPath := filepath.Join(ftbApp.InstallLocation, "profiles.json")
+	profilesExists := checkFilePathExistsSpinner("profiles.json", profilesPath)
+	if profilesExists {
+		profilesRaw, err := os.ReadFile(profilesPath)
+		if err != nil {
+			return Profiles{}, err
+		}
+		var profiles Profiles
+		if err := json.Unmarshal(profilesRaw, &profiles); err != nil {
+			return Profiles{}, err
+		}
+		return profiles, nil
+	}
+	return Profiles{}, errors.New("profiles.json not found")
 }
