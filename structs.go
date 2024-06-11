@@ -106,13 +106,13 @@ type (
 
 	// Manifest
 	Manifest struct {
-		Version                 string            `json:"version,omitempty"`
-		MetaDetails             MetaDetails       `json:"meta,omitempty"`
-		AppDetails              AppMeta           `json:"app,omitempty"`
-		AppLogs                 map[string]string `json:"logs,omitempty"`
-		ProviderInstanceMapping []Instances       `json:"providerInstanceMapping,omitempty"`
-		InstanceLogs            []InstanceLogs    `json:"instanceLogs,omitempty"`
-		NetworkChecks           []NetworkCheck    `json:"networkChecks,omitempty"`
+		Version                 string               `json:"version,omitempty"`
+		MetaDetails             MetaDetails          `json:"metaDetails,omitempty"`
+		AppDetails              AppDetails           `json:"appDetails,omitempty"`
+		AppLogs                 map[string]string    `json:"appLogs,omitempty"`
+		ProviderInstanceMapping map[string]Instances `json:"providerInstanceMapping,omitempty"`
+		InstanceLogs            []InstanceLogs       `json:"instanceLogs,omitempty"`
+		NetworkChecks           []NetworkCheck       `json:"networkChecks,omitempty"`
 	}
 	MetaDetails struct {
 		InstanceCount     int    `json:"instanceCount,omitempty"`
@@ -120,11 +120,16 @@ type (
 		Today             string `json:"today,omitempty"`
 		Time              int64  `json:"time,omitempty"`
 		AddedAccounts     int    `json:"addedAccounts,omitempty"`
-		HasActiveAccounts bool   `json:"hasActiveAccounts,omitempty"`
+		HasActiveAccounts bool   `json:"hasActiveAccounts"`
+	}
+	AppDetails struct {
+		App           string `json:"app,omitempty"`
+		Platform      string `json:"platform,omitempty"`
+		SharedVersion string `json:"sharedVersion,omitempty"`
 	}
 	Instances struct {
 		Name        string `json:"name,omitempty"`
-		PackType    int    `json:"packType,omitempty"`
+		PackType    int    `json:"packType"`
 		PackId      int    `json:"packId,omitempty"`
 		PackVersion int    `json:"packVersion,omitempty"`
 	}

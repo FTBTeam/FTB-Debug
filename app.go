@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"time"
 )
 
 func runAppChecks() {
@@ -22,18 +21,7 @@ func runAppChecks() {
 	// Validate bin folder exists
 	doesBinExist()
 
-	pterm.DefaultSection.WithLevel(2).Println("App info")
-	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
-	appVerData, err := getAppVersion()
-	if err != nil {
-		pterm.Error.Println("Error getting app version:", err)
-		return
-	}
-	pterm.Info.Println("App version:", appVerData.AppVersion)
-	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
-	pterm.Info.Println("Branch:", appVerData.Branch)
-
-	//TODO Add instance checking and settings file validation
+	//TODO Add instance checking and settings xfile validation
 	err = loadAppSettings()
 	if err != nil {
 		pterm.Error.Println("Failed to load app settings:\n", err)
@@ -44,10 +32,6 @@ func runAppChecks() {
 		}
 
 	}
-
-	pterm.DefaultSection.Println("Check for instances")
-	listInstances()
-
 }
 
 func loadAppSettings() error {
@@ -103,10 +87,11 @@ func loadAppSettings() error {
 	}
 }
 
-func listInstances() {
+func getInstances() (map[string]Instances, error) {
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
+		pIM := make(map[string]Instances)
 		for _, instance := range instances {
 			name := instance.Name()
 			if instance.IsDir() {
@@ -115,42 +100,31 @@ func listInstances() {
 					var i Instance
 					iJsonStat, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
-						pterm.Error.Println("Error getting instance.json file stat:", err)
+						return nil, fmt.Errorf("error getting instance.json file stat: %s", err.Error())
 					}
 					data, err := os.ReadFile(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
-						pterm.Error.Println("Error reading instance.json:", err)
-						pterm.Debug.Println("JSON data:", string(data))
 						filesToUpload = append(filesToUpload, FilesToUploadStruct{File: iJsonStat, Path: path.Join(ftbApp.Settings.InstanceLocation, name, iJsonStat.Name())})
+						return nil, fmt.Errorf("error reading instance.json: %s", err.Error())
 					} else {
-						pterm.Info.Println("Name:", i.Name)
-						pterm.Info.Println("Version:", i.Version)
-						pterm.Info.Println("Version ID:", i.VersionID)
-						pterm.Info.Println("Memory:", i.Memory)
-						pterm.Info.Println(fmt.Sprintf("Min/Rec Memory: %d/%d", i.MinMemory, i.RecMemory))
-						pterm.Info.Println("Custom Args:", i.JvmArgs)
-						pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
-						pterm.Info.Println("Is Modified:", i.IsModified)
+						pIM[i.UUID] = Instances{
+							Name:        i.Name,
+							PackType:    i.PackType,
+							PackId:      i.ID,
+							PackVersion: i.VersionID,
+						}
 					}
-					pterm.Info.Println("Name:", i.Name)
-					pterm.Info.Println("Version:", i.Version)
-					pterm.Info.Println("Version ID:", i.VersionID)
-					pterm.Info.Println("Memory:", i.Memory)
-					pterm.Info.Println(fmt.Sprintf("Min/Rec Memory: %d/%d", i.MinMemory, i.RecMemory))
-					pterm.Info.Println("Custom Args:", i.JvmArgs)
-					pterm.Info.Println("Embedded JRE:", i.EmbeddedJre)
-					pterm.Info.Println("Is Modified:", i.IsModified)
 
 					_, err = validateJson(name+" instance.json", filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
-						pterm.Error.Println("instance.json failed to validate")
+						return nil, fmt.Errorf("instance.json failed to validate: %s", err.Error())
 					}
 				}
-			} else {
-				pterm.Info.Println("found extra file in instances directory: ", name)
 			}
 		}
+		return pIM, nil
 	}
+	return nil, errors.New("instances directory not found")
 }
 
 // NEW STUFF HERE

@@ -93,8 +93,41 @@ func main() {
 	pterm.DefaultHeader.Println("Running App Checks")
 	runAppChecks()
 
+	pterm.DefaultSection.WithLevel(2).Println("App info")
+	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
+	appVerData, err := getAppVersion()
+	if err != nil {
+		pterm.Error.Println("Error getting app version:", err)
+		return
+	}
+	pterm.Info.Println("App version:", appVerData.AppVersion)
+	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
+	pterm.Info.Println("Branch:", appVerData.Branch)
+
+	pterm.DefaultSection.Println("Check for instances")
+	instances, err := getInstances()
+	if err != nil {
+		pterm.Error.Println("Failed to get instances:", err)
+		return
+	}
+
 	// Compile manifest
+	manifest.Version = "2.0.1-Go"
+	manifest.MetaDetails = MetaDetails{
+		InstanceCount:     len(instances),
+		CloudInstances:    0, //todo
+		Today:             time.Now().UTC().Format(time.DateOnly),
+		Time:              time.Now().Unix(),
+		AddedAccounts:     0,     // todo
+		HasActiveAccounts: false, //todo
+	}
+	manifest.AppDetails = AppDetails{
+		App:           appVerData.Commit,
+		Platform:      "TODO",
+		SharedVersion: appVerData.AppVersion,
+	}
 	manifest.NetworkChecks = nc
+	manifest.ProviderInstanceMapping = instances
 
 	pterm.DefaultHeader.Println("Manifest")
 	jsonManifest, err := json.MarshalIndent(manifest, "", "  ")
