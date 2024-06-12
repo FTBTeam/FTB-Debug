@@ -139,7 +139,7 @@ func uploadFile(filePath string, comment string) {
 	} else {
 		data = sanitizeLogs(data)
 	}
-	r, err := uploadRequest(data)
+	r, err := uploadRequest(data, "")
 	if err != nil {
 		pterm.Error.Printfln("Uploading %s: failed to upload\n%s", comment, err)
 		return
@@ -147,14 +147,19 @@ func uploadFile(filePath string, comment string) {
 	pterm.Info.Printfln("Uploaded [%s#%s]", r.Data.ID, comment)
 }
 
-func uploadRequest(data []byte) (PsteMeResp, error) {
+func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 	// http put request to https://pste.me/v1/paste
 	client := &http.Client{}
 	req, err := http.NewRequest("PUT", "https://pste.me/v1/paste", bytes.NewBuffer(data))
 	if err != nil {
 		return PsteMeResp{}, err
 	}
-	req.URL.Query().Add("expires_at", strconv.FormatInt(time.Now().Add(time.Hour*1440).Unix(), 10))
+	query := req.URL.Query()
+	query.Add("expires_at", strconv.FormatInt(time.Now().Add(time.Hour*1440).Unix(), 10))
+	if lang != "" {
+		query.Add("language", lang)
+	}
+	req.URL.RawQuery = query.Encode()
 	resp, err := client.Do(req)
 	if err != nil {
 		return PsteMeResp{}, err
