@@ -3,16 +3,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/yusufpapurcu/wmi"
-	"io"
-	"os"
-	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -22,46 +16,6 @@ type (
 		Version string
 	}
 )
-
-// TODO implement getting app version from overwolf
-func getAppVersion() {
-	var rawVersions []string
-	appLocal, _ := os.UserCacheDir()
-	overwolfDIR := filepath.Join(appLocal, "Overwolf", "Extensions", owUID)
-	files, err := os.ReadDir(overwolfDIR)
-	if err != nil {
-		pterm.Error.Println("Error while reading Overwolf versions")
-		return
-	}
-	for _, file := range files {
-		if file.IsDir() {
-			rawVersions = append(rawVersions, file.Name())
-		}
-	}
-	versions := make([]*version.Version, len(rawVersions))
-	for i, raw := range rawVersions {
-		v, _ := version.NewVersion(raw)
-		versions[i] = v
-	}
-	sort.Slice(version.Collection(versions), func(i, j int) bool {
-		return versions[i].GreaterThan(versions[j])
-	})
-	pterm.Debug.Println("Found versions:", versions)
-	ftbApp.AppVersion = versions[0].String()
-
-	jsonFile, err := os.Open(filepath.Join(overwolfDIR, ftbApp.AppVersion, "meta.json"))
-	// if we os.Open returns an error then handle it
-	if err != nil {
-		pterm.Error.Println("Error opening version.json:", err)
-	}
-	defer jsonFile.Close()
-	byteValue, _ := io.ReadAll(jsonFile)
-	var versionJson VersionJson
-	json.Unmarshal(byteValue, &versionJson)
-	ftbApp.JarVersion = versionJson.JarVersion
-	ftbApp.WebVersion = versionJson.WebVersion
-	ftbApp.AppBranch = versionJson.Branch
-}
 
 func getSysInfo() (oSystem string, err error) {
 	var dst []Win32_OperatingSystem
