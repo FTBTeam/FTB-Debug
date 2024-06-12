@@ -169,6 +169,9 @@ func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 	if err != nil {
 		return PsteMeResp{}, err
 	}
+	if resp.StatusCode != 200 {
+		return PsteMeResp{}, fmt.Errorf("invalid status code: %d\n%s", resp.StatusCode, string(content))
+	}
 	var r PsteMeResp
 	if err := json.Unmarshal(content, &r); err != nil {
 		return PsteMeResp{}, err
