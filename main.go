@@ -14,14 +14,14 @@ import (
 )
 
 var (
-	ftbApp        FTBApp
-	logFile       *os.File
-	logMw         io.Writer
-	owUID         = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re            = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	cli           *bool
-	GitCommit     string
-	filesToUpload []FilesToUploadStruct
+	ftbApp    FTBApp
+	logFile   *os.File
+	logMw     io.Writer
+	owUID     = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re        = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	cli       *bool
+	GitCommit string
+	//filesToUpload []FilesToUploadStruct
 	instancePaths []string
 )
 
