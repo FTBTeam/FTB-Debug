@@ -35,9 +35,10 @@ func loadAppSettings() error {
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
-		doesAppSettingsExist := doesPathExist(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+		appSettingsPath := filepath.Join(ftbApp.InstallLocation, "storage", "settings.json")
+		doesAppSettingsExist := doesPathExist(appSettingsPath)
 		if doesAppSettingsExist {
-			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+			appSettings, err = os.ReadFile(appSettingsPath)
 			if err != nil {
 				pterm.Error.Println("Error reading settings.json:", err)
 			} else {
@@ -158,17 +159,18 @@ func getInstances() (map[string]Instances, []InstanceLogs, error) {
 func getAppVersion() (AppMeta, error) {
 	var metaPath string
 	if runtime.GOOS == "windows" {
-		// TODO: Implement windows version
+		metaPath = filepath.Join(windowsAppPath, "resources", "meta.json")
 	} else if runtime.GOOS == "darwin" {
 		metaPath = filepath.Join(macAppPath, "contents", "Resources", "meta.json")
-		installExists := doesPathExist(metaPath)
-		if !installExists {
-			return AppMeta{}, errors.New("app meta not found")
-		}
 	} else if runtime.GOOS == "linux" {
-
+		return AppMeta{}, errors.New("linux not supported yet")
 	} else {
 		return AppMeta{}, errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+	}
+
+	installExists := doesPathExist(metaPath)
+	if !installExists {
+		return AppMeta{}, errors.New("app meta not found")
 	}
 
 	// Read json file
