@@ -43,7 +43,7 @@ func ByteCountIEC(b int64) string {
 }
 
 func validateJson(message string, filePath string) (bool, error) {
-	jsonF := checkFilePathExistsSpinner(message, filePath)
+	jsonF := doesPathExist(filePath)
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
 		if err != nil {
@@ -92,29 +92,36 @@ func getOSInfo() {
 	}
 }
 
-func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
-	dirStatus, _ := pterm.DefaultSpinner.Start("Checking ", "for ", dirMessage)
-	message, success := checkFilePath(filePath)
-	if !success {
-		dirStatus.Warning(fmt.Sprintf("%s: %s", dirMessage, message))
-		return false
-	}
+//func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
+//	dirStatus, _ := pterm.DefaultSpinner.Start("Checking ", "for ", dirMessage)
+//	message, success := checkFilePath(filePath)
+//	if !success {
+//		dirStatus.Warning(fmt.Sprintf("%s: %s", dirMessage, message))
+//		return false
+//	}
+//
+//	dirStatus.Success(fmt.Sprintf("%s: %s", dirMessage, message))
+//	return true
+//}
 
-	dirStatus.Success(fmt.Sprintf("%s: %s", dirMessage, message))
-	return true
-}
-
-func checkFilePath(filePath string) (string, bool) {
+func doesPathExist(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
-		return "file/directory exists", true
-
-	} else if os.IsNotExist(err) {
-		return "file/directory does not exist", false
-
-	} else {
-		return "possible permission error, could not determine if file/directory explicitly exists or not", false
+		return true
 	}
+	return false
 }
+
+//func checkFilePath(filePath string) (string, bool) {
+//	if _, err := os.Stat(filePath); err == nil {
+//		return "file/directory exists", true
+//
+//	} else if os.IsNotExist(err) {
+//		return "file/directory does not exist", false
+//
+//	} else {
+//		return "possible permission error, could not determine if file/directory explicitly exists or not", false
+//	}
+//}
 
 func uploadFile(filePath string, comment string) {
 	pterm.Debug.Println(filePath)
@@ -237,7 +244,7 @@ func logToConsole(b bool) {
 }
 
 func doesBinExist() {
-	binExists := checkFilePathExistsSpinner("App bin directory", filepath.Join(ftbApp.InstallLocation, "bin"))
+	binExists := doesPathExist(filepath.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		ftbApp.Structure.Bin.Exists = true
 	}
@@ -245,19 +252,19 @@ func doesBinExist() {
 
 func locateFTBApp() (string, error) {
 	if runtime.GOOS == "windows" {
-		if checkFilePathExistsSpinner("FTB App install (AppData)", windowsAppPath) {
+		if doesPathExist(windowsAppPath) {
 			return windowsAppPath, nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "darwin" {
-		if checkFilePathExistsSpinner("FTB App location", macAppPath) {
+		if doesPathExist(macAppPath) {
 			return macAppPath, nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "linux" {
-		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", linuxAppPath) {
+		if doesPathExist(linuxAppPath) {
 			return linuxAppPath, nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
@@ -269,21 +276,21 @@ func locateFTBApp() (string, error) {
 
 func locateFTBAFolder() (string, error) {
 	if runtime.GOOS == "windows" {
-		if checkFilePathExistsSpinner("FTB App directory (AppData)", filepath.Join(os.Getenv("localappdata"), ".ftba")) {
+		if doesPathExist(filepath.Join(os.Getenv("localappdata"), ".ftba")) {
 			return filepath.Join(os.Getenv("localappdata"), ".ftba"), nil
-		} else if checkFilePathExistsSpinner("FTB App directory (home)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+		} else if doesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
 			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "darwin" {
-		if checkFilePathExistsSpinner("FTB App directory (Application Support)", filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
+		if doesPathExist(filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
 			return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "linux" {
-		if checkFilePathExistsSpinner("FTB App directory (~/.ftba)", filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+		if doesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
 			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")

@@ -35,7 +35,7 @@ func loadAppSettings() error {
 	if ftbApp.Structure.Bin.Exists {
 		var appSettings []byte
 		var err error
-		doesAppSettingsExist := checkFilePathExistsSpinner("Does settings.json exist?", filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
+		doesAppSettingsExist := doesPathExist(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 		if doesAppSettingsExist {
 			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
 			if err != nil {
@@ -85,7 +85,7 @@ func loadAppSettings() error {
 }
 
 func getInstances() (map[string]Instances, []InstanceLogs, error) {
-	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
+	instancesExists := doesPathExist(ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
@@ -110,16 +110,23 @@ func getInstances() (map[string]Instances, []InstanceLogs, error) {
 						}
 
 						// Check for logs
-						logs, err := getInstanceLogs(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
-						if err != nil {
-							pterm.Error.Printfln("Error getting instance logs: %s", err.Error())
-							continue
+						logsPath := filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs")
+						logs := make(map[string]string)
+						if doesPathExist(logsPath) {
+							logs, err = getInstanceLogs(logsPath)
+							if err != nil {
+								pterm.Error.Printfln("Error getting instance logs: %s", err.Error())
+							}
 						}
+
 						// Check for crash-reports
-						crashLogs, err := getInstanceLogs(filepath.Join(ftbApp.Settings.InstanceLocation, name, "crash-reports"))
-						if err != nil {
-							pterm.Error.Printfln("Error getting instance crash logs: %s", err.Error())
-							continue
+						crashLogsPath := filepath.Join(ftbApp.Settings.InstanceLocation, name, "crash-reports")
+						crashLogs := make(map[string]string)
+						if doesPathExist(crashLogsPath) {
+							crashLogs, err = getInstanceLogs(crashLogsPath)
+							if err != nil {
+								pterm.Error.Printfln("Error getting instance crash logs: %s", err.Error())
+							}
 						}
 						instanceLogs = append(instanceLogs, InstanceLogs{
 							Created:   0,
@@ -154,7 +161,7 @@ func getAppVersion() (AppMeta, error) {
 		// TODO: Implement windows version
 	} else if runtime.GOOS == "darwin" {
 		metaPath = filepath.Join(macAppPath, "contents", "Resources", "meta.json")
-		installExists := checkFilePathExistsSpinner("App metadata", metaPath)
+		installExists := doesPathExist(metaPath)
 		if !installExists {
 			return AppMeta{}, errors.New("app meta not found")
 		}
@@ -178,7 +185,7 @@ func getAppVersion() (AppMeta, error) {
 
 func getProfiles() (Profiles, error) {
 	profilesPath := filepath.Join(ftbApp.InstallLocation, "profiles.json")
-	profilesExists := checkFilePathExistsSpinner("profiles.json", profilesPath)
+	profilesExists := doesPathExist(profilesPath)
 	if profilesExists {
 		profilesRaw, err := os.ReadFile(profilesPath)
 		if err != nil {
@@ -239,10 +246,6 @@ func getAppLogs() (map[string]string, error) {
 }
 
 func getInstanceLogs(path string) (map[string]string, error) {
-	if !checkFilePathExistsSpinner("Instance logs folder", path) {
-		return nil, errors.New("instance logs folder not found")
-	}
-
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
