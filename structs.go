@@ -138,6 +138,7 @@ type (
 		McVersion string            `json:"mcVersion,omitempty"`
 		ModLoader string            `json:"modLoader,omitempty"`
 		Logs      map[string]string `json:"logs,omitempty"`
+		CrashLogs map[string]string `json:"crashLogs,omitempty"`
 	}
 
 	// Pste.me response

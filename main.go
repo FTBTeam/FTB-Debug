@@ -22,7 +22,6 @@ var (
 	cli       *bool
 	GitCommit string
 	//filesToUpload []FilesToUploadStruct
-	instancePaths []string
 )
 
 func init() {
@@ -117,7 +116,7 @@ func main() {
 	}
 
 	pterm.DefaultSection.Println("Check for instances")
-	instances, err := getInstances()
+	instances, instanceLogs, err := getInstances()
 	if err != nil {
 		pterm.Error.Println("Failed to get instances:", err)
 		return
@@ -137,8 +136,9 @@ func main() {
 		SharedVersion: appVerData.AppVersion,
 	}
 	manifest.AppLogs = appLogs
-	manifest.NetworkChecks = nc
 	manifest.ProviderInstanceMapping = instances
+	manifest.InstanceLogs = instanceLogs
+	manifest.NetworkChecks = nc
 
 	pterm.DefaultHeader.Println("Manifest")
 	jsonManifest, err := json.MarshalIndent(manifest, "", "  ")

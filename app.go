@@ -84,27 +84,23 @@ func loadAppSettings() error {
 	}
 }
 
-func getInstances() (map[string]Instances, error) {
+func getInstances() (map[string]Instances, []InstanceLogs, error) {
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
 		pIM := make(map[string]Instances)
+		var instanceLogs []InstanceLogs
 		for _, instance := range instances {
 			name := instance.Name()
 			if instance.IsDir() {
 				if name != ".localCache" {
 					pterm.Info.Println("found instance: ", name)
 					var i Instance
-					instancePaths = append(instancePaths, filepath.Join(ftbApp.Settings.InstanceLocation, name))
-					//iJsonStat, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
-					//if err != nil {
-					//	return nil, fmt.Errorf("error getting instance.json file stat: %s", err.Error())
-					//}
 					data, err := os.ReadFile(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err := json.Unmarshal(data, &i); err != nil {
-						//filesToUpload = append(filesToUpload, FilesToUploadStruct{File: iJsonStat, Path: path.Join(ftbApp.Settings.InstanceLocation, name, iJsonStat.Name())})
-						return nil, fmt.Errorf("error reading instance.json: %s", err.Error())
+						pterm.Error.Printfln("error reading instance.json: %s", err.Error())
+						continue
 					} else {
 						pIM[i.UUID] = Instances{
 							Name:        i.Name,
@@ -112,18 +108,42 @@ func getInstances() (map[string]Instances, error) {
 							PackId:      i.ID,
 							PackVersion: i.VersionID,
 						}
+
+						// Check for logs
+						logs, err := getInstanceLogs(filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs"))
+						if err != nil {
+							pterm.Error.Printfln("Error getting instance logs: %s", err.Error())
+							continue
+						}
+						// Check for crash-reports
+						crashLogs, err := getInstanceLogs(filepath.Join(ftbApp.Settings.InstanceLocation, name, "crash-reports"))
+						if err != nil {
+							pterm.Error.Printfln("Error getting instance crash logs: %s", err.Error())
+							continue
+						}
+						instanceLogs = append(instanceLogs, InstanceLogs{
+							Created:   0,
+							Name:      i.Name,
+							UUID:      i.UUID,
+							McVersion: i.McVersion,
+							ModLoader: i.ModLoader,
+							Logs:      logs,
+							CrashLogs: crashLogs,
+						})
+
 					}
 
 					_, err = validateJson(name+" instance.json", filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
-						return nil, fmt.Errorf("instance.json failed to validate: %s", err.Error())
+						pterm.Error.Printfln("instance.json failed to validate: %s", err.Error())
+						continue
 					}
 				}
 			}
 		}
-		return pIM, nil
+		return pIM, instanceLogs, nil
 	}
-	return nil, errors.New("instances directory not found")
+	return nil, nil, errors.New("instances directory not found")
 }
 
 // NEW STUFF HERE
@@ -223,7 +243,7 @@ func getInstanceLogs(path string) (map[string]string, error) {
 		return nil, errors.New("instance logs folder not found")
 	}
 
-	files, err := os.ReadDir(filepath.Join(path))
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
