@@ -22,6 +22,7 @@ var (
 	cli           *bool
 	GitCommit     string
 	filesToUpload []FilesToUploadStruct
+	instancePaths []string
 )
 
 func init() {
@@ -110,6 +111,11 @@ func main() {
 	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
 	pterm.Info.Println("Branch:", appVerData.Branch)
 
+	appLogs, err := getAppLogs()
+	if err != nil {
+		return
+	}
+
 	pterm.DefaultSection.Println("Check for instances")
 	instances, err := getInstances()
 	if err != nil {
@@ -130,6 +136,7 @@ func main() {
 		App:           appVerData.Commit,
 		SharedVersion: appVerData.AppVersion,
 	}
+	manifest.AppLogs = appLogs
 	manifest.NetworkChecks = nc
 	manifest.ProviderInstanceMapping = instances
 
@@ -139,6 +146,10 @@ func main() {
 		pterm.Error.Println("Error marshalling manifest:", err)
 		return
 	}
-	pterm.Info.Println(string(jsonManifest))
+	request, err := uploadRequest(jsonManifest, "json")
+	if err != nil {
+		return
+	}
+	pterm.Info.Println(request.Data.ID)
 
 }

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -82,7 +85,6 @@ func loadAppSettings() error {
 }
 
 func getInstances() (map[string]Instances, error) {
-
 	instancesExists := checkFilePathExistsSpinner("instances directory", ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
@@ -94,6 +96,7 @@ func getInstances() (map[string]Instances, error) {
 				if name != ".localCache" {
 					pterm.Info.Println("found instance: ", name)
 					var i Instance
+					instancePaths = append(instancePaths, filepath.Join(ftbApp.Settings.InstanceLocation, name))
 					iJsonStat, err := os.Stat(filepath.Join(ftbApp.Settings.InstanceLocation, name, "instance.json"))
 					if err != nil {
 						return nil, fmt.Errorf("error getting instance.json file stat: %s", err.Error())
@@ -168,4 +171,66 @@ func getProfiles() (Profiles, error) {
 		return profiles, nil
 	}
 	return Profiles{}, errors.New("profiles.json not found")
+}
+
+func getAppLogs() (map[string]string, error) {
+	lPath := filepath.Join(ftbApp.InstallLocation, "logs")
+	files, err := os.ReadDir(lPath)
+	if err != nil {
+		return nil, err
+	}
+	logFile := make(map[string]string)
+	for _, file := range files {
+		if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" || filepath.Ext(file.Name()) == ".gz" {
+			data, err := os.ReadFile(filepath.Join(lPath, file.Name()))
+			if err != nil {
+				pterm.Error.Println("Error reading log file:", err)
+				continue
+			}
+
+			if filepath.Ext(file.Name()) == ".gz" {
+				reader, err := gzip.NewReader(bytes.NewReader(data))
+				if err != nil {
+					return nil, err
+				}
+				data, err = io.ReadAll(reader)
+			}
+
+			request, err := uploadRequest(data, "log")
+			if err != nil {
+				pterm.Error.Println("Error creating upload request:", err)
+				continue
+			}
+			logFile[file.Name()] = request.Data.ID
+		}
+	}
+	return logFile, nil
+}
+
+func getInstanceLogs(path string) (map[string]string, error) {
+	if !checkFilePathExistsSpinner("Instance logs folder", path) {
+		return nil, errors.New("instance logs folder not found")
+	}
+
+	files, err := os.ReadDir(filepath.Join(path))
+	if err != nil {
+		return nil, err
+	}
+	logFile := make(map[string]string)
+	for _, file := range files {
+		if filepath.Ext(file.Name()) == ".log" || filepath.Ext(file.Name()) == ".txt" {
+			data, err := os.ReadFile(filepath.Join(path, file.Name()))
+			if err != nil {
+				pterm.Error.Println("Error reading log file:", err)
+				continue
+			}
+			request, err := uploadRequest(data, "log")
+			if err != nil {
+				pterm.Error.Println("Error creating upload request:", err)
+				continue
+			}
+			logFile[file.Name()] = request.Data.ID
+		}
+	}
+	return logFile, nil
 }
