@@ -138,29 +138,27 @@ func getAppVersion() (AppMeta, error) {
 		// checking overwolf
 		var rawVersions []string
 		files, err := os.ReadDir(overwolfAppPath)
-		if err != nil {
-			return AppMeta{}, errors.New("error while reading Overwolf versions")
-		}
-		for _, file := range files {
-			if file.IsDir() {
-				rawVersions = append(rawVersions, file.Name())
+		if err == nil {
+			for _, file := range files {
+				if file.IsDir() {
+					rawVersions = append(rawVersions, file.Name())
+				}
 			}
-		}
-		versions := make([]*version.Version, len(rawVersions))
-		for i, raw := range rawVersions {
-			v, _ := version.NewVersion(raw)
-			versions[i] = v
-		}
-		if len(versions) == 0 {
-			return AppMeta{}, errors.New("no versions found")
-		}
-		foundOverwolfVersion = true
-		sort.Slice(version.Collection(versions), func(i, j int) bool {
-			return versions[i].GreaterThan(versions[j])
-		})
-		pterm.Debug.Println("Found versions:", versions)
-		if !doesPathExist(metaPath) {
-			metaPath = filepath.Join(overwolfAppPath, versions[0].String(), "meta.json")
+			versions := make([]*version.Version, len(rawVersions))
+			for i, raw := range rawVersions {
+				v, _ := version.NewVersion(raw)
+				versions[i] = v
+			}
+			if len(versions) > 0 {
+				foundOverwolfVersion = true
+				sort.Slice(version.Collection(versions), func(i, j int) bool {
+					return versions[i].GreaterThan(versions[j])
+				})
+				pterm.Debug.Println("Found versions:", versions)
+				if !doesPathExist(metaPath) {
+					metaPath = filepath.Join(overwolfAppPath, versions[0].String(), "meta.json")
+				}
+			}
 		}
 	} else if runtime.GOOS == "darwin" {
 		metaPath = filepath.Join(macAppPath, "contents", "Resources", "meta.json")
