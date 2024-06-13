@@ -270,3 +270,31 @@ func getInstanceLogs(path string) (map[string]string, error) {
 	}
 	return logFile, nil
 }
+
+func getMiscFile(path string) (string, error) {
+	exists := doesPathExist(path)
+	if !exists {
+		return "", fmt.Errorf("file %s does not exist", path)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	if filepath.Ext(path) == ".gz" {
+		reader, err := gzip.NewReader(bytes.NewReader(data))
+		if err != nil {
+			return "", err
+		}
+		data, err = io.ReadAll(reader)
+	}
+
+	lang := ""
+	if filepath.Ext(path) == ".json" {
+		lang = "json"
+	}
+	request, err := uploadRequest(data, lang)
+	if err != nil {
+		return "", err
+	}
+	return request.Data.ID, nil
+}

@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/user"
+	"path/filepath"
 	"regexp"
 	"time"
 )
@@ -120,6 +121,21 @@ func main() {
 	if err != nil {
 		pterm.Error.Println("Failed to get instances:", err)
 		return
+	}
+
+	// Additional files to upload
+	miscFiles := []string{
+		filepath.Join(ftbApp.InstallLocation, "storage", "settings.json"),
+		filepath.Join(ftbApp.InstallLocation, "bin", "runtime", "installations.json"),
+	}
+
+	for _, mf := range miscFiles {
+		id, err := getMiscFile(mf)
+		if err != nil {
+			pterm.Error.Println("Error getting file:", err)
+			continue
+		}
+		appLogs[filepath.Base(mf)] = id
 	}
 
 	// Compile manifest
