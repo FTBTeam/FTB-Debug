@@ -58,7 +58,9 @@ var (
 		},
 	}
 
-	windowsAppPath = filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app")
+	windowsAppPath  = filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app")
+	overwolfAppPath = filepath.Join(os.Getenv("localappdata"), "Overwolf", "Extensions", owUID)
+	overwolfAppLogs = filepath.Join(os.Getenv("localappdata"), "Overwolf", "Log", "Apps", "FTB App")
 
 	linuxAppPath = filepath.Join(os.Getenv("HOME"), ".ftb-app")
 

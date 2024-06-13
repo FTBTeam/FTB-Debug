@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 )
 
 func runAppChecks() {
@@ -41,36 +43,8 @@ func loadAppSettings() error {
 			appSettings, err = os.ReadFile(appSettingsPath)
 			if err != nil {
 				pterm.Error.Println("Error reading settings.json:", err)
-			} else {
-				//settingsFile, err := os.Stat(filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"))
-				//if err != nil {
-				//	pterm.Error.Println("Error getting settings.json stat:", err)
-				//} else {
-				//	filesToUpload = append(filesToUpload, FilesToUploadStruct{
-				//		File: settingsFile,
-				//		Path: filepath.Join(ftbApp.InstallLocation, "bin", "settings.json"),
-				//	})
-				//}
-			}
-		} else {
-			appSettings, err = os.ReadFile(filepath.Join(ftbApp.InstallLocation, "app_settings.json"))
-			if err != nil {
-				pterm.Error.Println("Error reading app_settings.json:", err)
-				return errors.New("error reading app_settings.json")
 			}
 		}
-		//doesVersionsManifestExist := checkFilePathExistsSpinner("Does version_manifest.json exist?", filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"))
-		//if doesVersionsManifestExist {
-		//	vManifest, err := os.Stat(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"))
-		//	if err != nil {
-		//		pterm.Error.Println("Error getting file stat for version_manifest.json:", err)
-		//	}
-		//	filesToUpload = append(filesToUpload, FilesToUploadStruct{
-		//		File: vManifest,
-		//		Path: filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"),
-		//	})
-		//}
-		//uploadFile(filepath.Join(ftbApp.InstallLocation, "bin", "versions", "version_manifest.json"), "version_manifest.json")
 
 		var i AppSettings
 		if err := json.Unmarshal(appSettings, &i); err != nil {
@@ -160,6 +134,34 @@ func getAppVersion() (AppMeta, error) {
 	var metaPath string
 	if runtime.GOOS == "windows" {
 		metaPath = filepath.Join(windowsAppPath, "resources", "meta.json")
+
+		// checking overwolf
+		var rawVersions []string
+		files, err := os.ReadDir(overwolfAppPath)
+		if err != nil {
+			return AppMeta{}, errors.New("error while reading Overwolf versions")
+		}
+		for _, file := range files {
+			if file.IsDir() {
+				rawVersions = append(rawVersions, file.Name())
+			}
+		}
+		versions := make([]*version.Version, len(rawVersions))
+		for i, raw := range rawVersions {
+			v, _ := version.NewVersion(raw)
+			versions[i] = v
+		}
+		if len(versions) == 0 {
+			return AppMeta{}, errors.New("no versions found")
+		}
+		foundOverwolfVersion = true
+		sort.Slice(version.Collection(versions), func(i, j int) bool {
+			return versions[i].GreaterThan(versions[j])
+		})
+		pterm.Debug.Println("Found versions:", versions)
+		if !doesPathExist(metaPath) {
+			metaPath = filepath.Join(overwolfAppPath, versions[0].String(), "meta.json")
+		}
 	} else if runtime.GOOS == "darwin" {
 		metaPath = filepath.Join(macAppPath, "contents", "Resources", "meta.json")
 	} else if runtime.GOOS == "linux" {

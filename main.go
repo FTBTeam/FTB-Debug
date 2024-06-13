@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	ftbApp    FTBApp
-	logFile   *os.File
-	logMw     io.Writer
-	owUID     = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
-	re        = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	cli       *bool
-	GitCommit string
-	//filesToUpload []FilesToUploadStruct
+	ftbApp               FTBApp
+	logFile              *os.File
+	logMw                io.Writer
+	owUID                = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
+	re                   = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
+	cli                  *bool
+	GitCommit            string
+	foundOverwolfVersion = false
 )
 
 func init() {
@@ -127,6 +127,11 @@ func main() {
 	miscFiles := []string{
 		filepath.Join(ftbApp.InstallLocation, "storage", "settings.json"),
 		filepath.Join(ftbApp.InstallLocation, "bin", "runtime", "installations.json"),
+	}
+	if foundOverwolfVersion {
+		filepath.Join(overwolfAppLogs, "index.html.logs")
+		filepath.Join(overwolfAppLogs, "background.html.logs")
+		filepath.Join(overwolfAppLogs, "chat.html.logs")
 	}
 
 	for _, mf := range miscFiles {
