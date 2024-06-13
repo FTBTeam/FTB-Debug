@@ -129,9 +129,9 @@ func main() {
 		filepath.Join(ftbApp.InstallLocation, "bin", "runtime", "installations.json"),
 	}
 	if foundOverwolfVersion {
-		filepath.Join(overwolfAppLogs, "index.html.logs")
-		filepath.Join(overwolfAppLogs, "background.html.logs")
-		filepath.Join(overwolfAppLogs, "chat.html.logs")
+		miscFiles = append(miscFiles, filepath.Join(overwolfAppLogs, "index.html.log"))
+		miscFiles = append(miscFiles, filepath.Join(overwolfAppLogs, "background.html.log"))
+		miscFiles = append(miscFiles, filepath.Join(overwolfAppLogs, "chat.html.log"))
 	}
 
 	for _, mf := range miscFiles {
