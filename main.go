@@ -138,6 +138,20 @@ func main() {
 		appLogs[filepath.Base(mf)] = id
 	}
 
+	tUpload, err := os.ReadFile(logFile.Name())
+	if err != nil {
+		pterm.Error.Println("Failed to read debug output", logFile.Name())
+		pterm.Error.Println(err)
+	} else {
+		resp, err := uploadRequest(tUpload, "")
+		if err != nil {
+			pterm.Error.Println("Failed to upload support file...")
+			pterm.Error.Println(err)
+		} else {
+			appLogs["debug-tool-output"] = resp.Data.ID
+		}
+	}
+
 	// Compile manifest
 	manifest.Version = "2.0.1-Go"
 	manifest.MetaDetails = MetaDetails{
