@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
 	"io"
@@ -185,6 +186,24 @@ func main() {
 	if err != nil {
 		return
 	}
-	pterm.Info.Println(request.Data.ID)
+	codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
+	pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", request.Data.ID))
+	pterm.Info.Println("Press ESC to exit...")
 
-}
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
+	for {
+		_, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+		if key == keyboard.KeyEsc {
+			break
+		}
+
+
+	}
