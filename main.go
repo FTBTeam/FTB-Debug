@@ -116,12 +116,12 @@ func main() {
 	appLogs := make(map[string]string)
 	instances := make(map[string]Instances)
 	instanceLogs := make([]InstanceLogs, 0)
-	if !failedToLoadSettings {
-		appLogs, err = getAppLogs()
-		if err != nil {
-			return
-		}
 
+	appLogs, err = getAppLogs()
+	if err != nil {
+		return
+	}
+	if !failedToLoadSettings {
 		pterm.DefaultSection.Println("Check for instances")
 		instances, instanceLogs, err = getInstances()
 		if err != nil {
