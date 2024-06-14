@@ -29,6 +29,7 @@ func runAppChecks() {
 	//TODO Add instance checking and settings file validation
 	err = loadAppSettings()
 	if err != nil {
+		failedToLoadSettings = true
 		pterm.Error.Println("Failed to load app settings:\n", err)
 	}
 }

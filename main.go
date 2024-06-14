@@ -24,6 +24,7 @@ var (
 	cli                  *bool
 	GitCommit            string
 	foundOverwolfVersion = false
+	failedToLoadSettings = false
 )
 
 func init() {
@@ -112,16 +113,21 @@ func main() {
 	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
 	pterm.Info.Println("Branch:", appVerData.Branch)
 
-	appLogs, err := getAppLogs()
-	if err != nil {
-		return
-	}
+	appLogs := make(map[string]string)
+	instances := make(map[string]Instances)
+	instanceLogs := make([]InstanceLogs, 0)
+	if !failedToLoadSettings {
+		appLogs, err = getAppLogs()
+		if err != nil {
+			return
+		}
 
-	pterm.DefaultSection.Println("Check for instances")
-	instances, instanceLogs, err := getInstances()
-	if err != nil {
-		pterm.Error.Println("Failed to get instances:", err)
-		return
+		pterm.DefaultSection.Println("Check for instances")
+		instances, instanceLogs, err = getInstances()
+		if err != nil {
+			pterm.Error.Println("Failed to get instances:", err)
+			return
+		}
 	}
 
 	// Additional files to upload
