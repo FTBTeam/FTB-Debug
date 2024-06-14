@@ -188,6 +188,7 @@ func main() {
 	}
 	codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
 	pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", request.Data.ID))
+
 	pterm.Info.Println("Press ESC to exit...")
 
 	if err := keyboard.Open(); err != nil {
@@ -204,6 +205,5 @@ func main() {
 		if key == keyboard.KeyEsc {
 			break
 		}
-
-
 	}
+}
