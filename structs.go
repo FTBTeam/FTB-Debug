@@ -1,18 +1,14 @@
 package main
 
 import (
-	"os"
 	"os/user"
 )
 
 type (
 	FTBApp struct {
-		User            *user.User
-		OWLocation      string
+		User *user.User
+		//OWLocation      string
 		InstallLocation string
-		AppVersion      string
-		AppBranch       string
-		Released        int
 		Structure       AppStructure
 		Settings        AppSettings
 	}
@@ -83,11 +79,6 @@ type (
 	Bin struct {
 		Exists bool
 		//Profile bool
-	}
-
-	FilesToUploadStruct struct {
-		File os.FileInfo
-		Path string
 	}
 
 	CheckURLStruct struct {

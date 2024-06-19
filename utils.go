@@ -92,36 +92,12 @@ func getOSInfo() {
 	}
 }
 
-//func checkFilePathExistsSpinner(dirMessage string, filePath string) bool {
-//	dirStatus, _ := pterm.DefaultSpinner.Start("Checking ", "for ", dirMessage)
-//	message, success := checkFilePath(filePath)
-//	if !success {
-//		dirStatus.Warning(fmt.Sprintf("%s: %s", dirMessage, message))
-//		return false
-//	}
-//
-//	dirStatus.Success(fmt.Sprintf("%s: %s", dirMessage, message))
-//	return true
-//}
-
 func doesPathExist(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
 		return true
 	}
 	return false
 }
-
-//func checkFilePath(filePath string) (string, bool) {
-//	if _, err := os.Stat(filePath); err == nil {
-//		return "file/directory exists", true
-//
-//	} else if os.IsNotExist(err) {
-//		return "file/directory does not exist", false
-//
-//	} else {
-//		return "possible permission error, could not determine if file/directory explicitly exists or not", false
-//	}
-//}
 
 func uploadFile(filePath string, comment string) {
 	pterm.Debug.Println(filePath)
@@ -249,30 +225,6 @@ func doesBinExist() {
 		ftbApp.Structure.Bin.Exists = true
 	}
 }
-
-//func locateFTBApp() (string, error) {
-//	if runtime.GOOS == "windows" {
-//		if doesPathExist(windowsAppPath) {
-//			return windowsAppPath, nil
-//		} else {
-//			return "", errors.New("unable to find .ftba directory")
-//		}
-//	} else if runtime.GOOS == "darwin" {
-//		if doesPathExist(macAppPath) {
-//			return macAppPath, nil
-//		} else {
-//			return "", errors.New("unable to find .ftba directory")
-//		}
-//	} else if runtime.GOOS == "linux" {
-//		if doesPathExist(linuxAppPath) {
-//			return linuxAppPath, nil
-//		} else {
-//			return "", errors.New("unable to find .ftba directory")
-//		}
-//	} else {
-//		return "", errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
-//	}
-//}
 
 func locateFTBAFolder() (string, error) {
 	if runtime.GOOS == "windows" {
