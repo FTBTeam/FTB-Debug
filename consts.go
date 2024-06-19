@@ -62,7 +62,7 @@ var (
 	overwolfAppPath = filepath.Join(os.Getenv("localappdata"), "Overwolf", "Extensions", owUID)
 	overwolfAppLogs = filepath.Join(os.Getenv("localappdata"), "Overwolf", "Log", "Apps", "FTB App")
 
-	linuxAppPath = filepath.Join(os.Getenv("HOME"), ".ftb-app")
+	//linuxAppPath = filepath.Join(os.Getenv("HOME"), ".ftb-app")
 
 	macAppPath = filepath.Join("/Applications", "FTB Electron App.app")
 )

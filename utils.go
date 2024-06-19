@@ -250,29 +250,29 @@ func doesBinExist() {
 	}
 }
 
-func locateFTBApp() (string, error) {
-	if runtime.GOOS == "windows" {
-		if doesPathExist(windowsAppPath) {
-			return windowsAppPath, nil
-		} else {
-			return "", errors.New("unable to find .ftba directory")
-		}
-	} else if runtime.GOOS == "darwin" {
-		if doesPathExist(macAppPath) {
-			return macAppPath, nil
-		} else {
-			return "", errors.New("unable to find .ftba directory")
-		}
-	} else if runtime.GOOS == "linux" {
-		if doesPathExist(linuxAppPath) {
-			return linuxAppPath, nil
-		} else {
-			return "", errors.New("unable to find .ftba directory")
-		}
-	} else {
-		return "", errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
-	}
-}
+//func locateFTBApp() (string, error) {
+//	if runtime.GOOS == "windows" {
+//		if doesPathExist(windowsAppPath) {
+//			return windowsAppPath, nil
+//		} else {
+//			return "", errors.New("unable to find .ftba directory")
+//		}
+//	} else if runtime.GOOS == "darwin" {
+//		if doesPathExist(macAppPath) {
+//			return macAppPath, nil
+//		} else {
+//			return "", errors.New("unable to find .ftba directory")
+//		}
+//	} else if runtime.GOOS == "linux" {
+//		if doesPathExist(linuxAppPath) {
+//			return linuxAppPath, nil
+//		} else {
+//			return "", errors.New("unable to find .ftba directory")
+//		}
+//	} else {
+//		return "", errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
+//	}
+//}
 
 func locateFTBAFolder() (string, error) {
 	if runtime.GOOS == "windows" {

@@ -107,11 +107,11 @@ func main() {
 	appVerData, err := getAppVersion()
 	if err != nil {
 		pterm.Error.Println("Error getting app version:", err)
-		return
+	} else {
+		pterm.Info.Println("App version:", appVerData.AppVersion)
+		pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
+		pterm.Info.Println("Branch:", appVerData.Branch)
 	}
-	pterm.Info.Println("App version:", appVerData.AppVersion)
-	pterm.Info.Println("App release date:", time.Unix(int64(appVerData.Released), 0))
-	pterm.Info.Println("Branch:", appVerData.Branch)
 
 	appLogs := make(map[string]string)
 	instances := make(map[string]Instances)
