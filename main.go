@@ -96,11 +96,12 @@ func main() {
 	pterm.DefaultHeader.Println("Running App Checks")
 	runAppChecks()
 	profiles, err := getProfiles()
+	hasActiveAccount := false
 	if err != nil {
 		pterm.Error.Println("Failed to get profiles:", err)
-		return
+	} else {
+		hasActiveAccount = isActiveProfileInProfiles(profiles)
 	}
-	hasActiveAccount := isActiveProfileInProfiles(profiles)
 
 	pterm.DefaultSection.WithLevel(2).Println("App info")
 	pterm.Info.Println(fmt.Sprintf("Located app at %s", ftbApp.InstallLocation))
@@ -119,6 +120,7 @@ func main() {
 
 	appLogs, err = getAppLogs()
 	if err != nil {
+		pterm.Error.Println("Failed to get app logs:", err)
 		return
 	}
 	if !failedToLoadSettings {
@@ -126,7 +128,6 @@ func main() {
 		instances, instanceLogs, err = getInstances()
 		if err != nil {
 			pterm.Error.Println("Failed to get instances:", err)
-			return
 		}
 	}
 
@@ -155,12 +156,14 @@ func main() {
 		pterm.Error.Println("Failed to read debug output", logFile.Name())
 		pterm.Error.Println(err)
 	} else {
-		resp, err := uploadRequest(tUpload, "")
-		if err != nil {
-			pterm.Error.Println("Failed to upload support file...")
-			pterm.Error.Println(err)
-		} else {
-			appLogs["debug-tool-output"] = resp.Data.ID
+		if len(tUpload) > 0 {
+			resp, err := uploadRequest(tUpload, "")
+			if err != nil {
+				pterm.Error.Println("Failed to upload support file...")
+				pterm.Error.Println(err)
+			} else {
+				appLogs["debug-tool-output"] = resp.Data.ID
+			}
 		}
 	}
 
@@ -188,13 +191,15 @@ func main() {
 		pterm.Error.Println("Error marshalling manifest:", err)
 		return
 	}
-	request, err := uploadRequest(jsonManifest, "json")
-	if err != nil {
-		return
+	if len(jsonManifest) > 0 {
+		request, err := uploadRequest(jsonManifest, "json")
+		if err != nil {
+			pterm.Error.Println("Failed to upload manifest:", err)
+			return
+		}
+		codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
+		pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", request.Data.ID))
 	}
-	codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
-	pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", request.Data.ID))
-
 	pterm.Info.Println("Press ESC to exit...")
 
 	if err := keyboard.Open(); err != nil {

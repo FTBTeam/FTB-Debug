@@ -237,6 +237,10 @@ func getAppLogs() (map[string]string, error) {
 				data, err = io.ReadAll(reader)
 			}
 
+			if len(data) == 0 {
+				continue
+			}
+
 			request, err := uploadRequest(data, "log")
 			if err != nil {
 				pterm.Error.Println("Error creating upload request:", err)
@@ -259,6 +263,9 @@ func getInstanceLogs(path string) (map[string]string, error) {
 			data, err := os.ReadFile(filepath.Join(path, file.Name()))
 			if err != nil {
 				pterm.Error.Println("Error reading log file:", err)
+				continue
+			}
+			if len(data) == 0 {
 				continue
 			}
 			request, err := uploadRequest(data, "log")
@@ -292,6 +299,9 @@ func getMiscFile(path string) (string, error) {
 	lang := ""
 	if filepath.Ext(path) == ".json" {
 		lang = "json"
+	}
+	if len(data) == 0 {
+		return "", errors.New("file is empty")
 	}
 	request, err := uploadRequest(data, lang)
 	if err != nil {
