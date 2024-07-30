@@ -179,6 +179,7 @@ func main() {
 	manifest.AppDetails = AppDetails{
 		App:           appVerData.Commit,
 		SharedVersion: appVerData.AppVersion,
+		Meta:          appVerData,
 	}
 	manifest.AppLogs = appLogs
 	manifest.ProviderInstanceMapping = instances

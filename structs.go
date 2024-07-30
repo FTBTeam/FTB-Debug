@@ -113,8 +113,9 @@ type (
 		HasActiveAccounts bool   `json:"hasActiveAccounts"`
 	}
 	AppDetails struct {
-		App           string `json:"app,omitempty"`
-		SharedVersion string `json:"sharedVersion,omitempty"`
+		App           string  `json:"app,omitempty"`
+		SharedVersion string  `json:"sharedVersion,omitempty"`
+		Meta          AppMeta `json:"meta,omitempty"`
 	}
 	Instances struct {
 		Name        string `json:"name,omitempty"`
@@ -151,14 +152,11 @@ type (
 		Released   int            `json:"released"`
 		Runtime    AppMetaRuntime `json:"runtime"`
 	}
-	AppMetaJvmArgs struct {
-		Value string `json:"value"`
-	}
 	AppMetaRuntime struct {
-		Version string           `json:"version"`
-		Jar     string           `json:"jar"`
-		Env     []interface{}    `json:"env"`
-		JvmArgs []AppMetaJvmArgs `json:"jvmArgs"`
+		Version string        `json:"version"`
+		Jar     string        `json:"jar"`
+		Env     []interface{} `json:"env"`
+		JvmArgs []string      `json:"jvmArgs"`
 	}
 
 	Profiles struct {

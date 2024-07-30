@@ -99,7 +99,7 @@ func doesPathExist(filePath string) bool {
 	return false
 }
 
-func uploadFile(filePath string, comment string) {
+/*func uploadFile(filePath string, comment string) {
 	pterm.Debug.Println(filePath)
 	fileName := filepath.Base(filePath)
 	data, err := os.ReadFile(filePath)
@@ -128,7 +128,7 @@ func uploadFile(filePath string, comment string) {
 		return
 	}
 	pterm.Info.Printfln("Uploaded [%s#%s]", r.Data.ID, comment)
-}
+}*/
 
 func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 	// http put request to https://pste.me/v1/paste
@@ -278,12 +278,16 @@ func runNetworkChecks() []NetworkCheck {
 				nc = append(nc, NetworkCheck{URL: url, Success: false, Error: true, Status: fmt.Sprintf("Error reading response body\n%s", err.Error())})
 				continue
 			}
-			if string(body) != checks.ExpectedReponse {
-				nc = append(nc, NetworkCheck{URL: url, Success: false, Error: false, Status: fmt.Sprintf("%s: Expected %s got %s", url, checks.ExpectedReponse, string(body))})
+			match, err := regexp.Match(checks.ExpectedReponse, body)
+			if err != nil {
+				return nil
+			}
+			if !match {
+				nc = append(nc, NetworkCheck{URL: url, Success: false, Error: false, Status: fmt.Sprintf("Expected %s got %s", checks.ExpectedReponse, string(body))})
 				continue
 			}
 		}
-		nc = append(nc, NetworkCheck{URL: url, Success: true, Error: false, Status: fmt.Sprintf("%s returned expected results", url)})
+		nc = append(nc, NetworkCheck{URL: url, Success: true, Error: false, Status: "ok"})
 	}
 	return nc
 }

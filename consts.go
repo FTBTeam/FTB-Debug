@@ -15,16 +15,10 @@ var (
 			ExpectedReponse:    "",
 		},
 		"https://meta.feed-the-beast.com/v1/health": {
-			Method:             "HEAD",
+			Method:             "GET",
 			ValidateResponse:   false,
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "",
-		},
-		"https://api.modpacks.ch/public/api/ping": {
-			Method:             "GET",
-			ValidateResponse:   true,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
 		},
 		"https://maven.fabricmc.net": {
 			Method:             "HEAD",
@@ -43,6 +37,12 @@ var (
 			ValidateResponse:   false,
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "",
+		},
+		"https://api.modpacks.ch/public/api/ping": {
+			Method:             "GET",
+			ValidateResponse:   true,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
 		},
 		"https://api.creeper.host/api/health": {
 			Method:             "HEAD",
