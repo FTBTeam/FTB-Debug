@@ -42,34 +42,40 @@ type (
 	}
 
 	Instance struct {
-		Private         bool     `json:"_private"`
-		UUID            string   `json:"uuid"`
-		ID              int      `json:"id"`
-		Art             string   `json:"art"`
-		Path            string   `json:"path"`
-		VersionID       int      `json:"versionId"`
-		Name            string   `json:"name"`
-		MinMemory       int      `json:"minMemory"`
-		RecMemory       int      `json:"recMemory"`
-		Memory          int      `json:"memory"`
-		Version         string   `json:"version"`
-		Dir             string   `json:"dir"`
-		Authors         []string `json:"authors"`
-		McVersion       string   `json:"mcVersion"`
-		JvmArgs         string   `json:"jvmArgs"`
-		EmbeddedJre     bool     `json:"embeddedJre"`
-		URL             string   `json:"url"`
-		ArtURL          string   `json:"artUrl"`
-		Width           int      `json:"width"`
-		Height          int      `json:"height"`
-		ModLoader       string   `json:"modLoader"`
-		LastPlayed      int      `json:"lastPlayed"`
-		IsModified      bool     `json:"isModified"`
-		IsImport        bool     `json:"isImport"`
-		CloudSaves      bool     `json:"cloudSaves"`
-		HasInstMods     bool     `json:"hasInstMods"`
-		InstallComplete bool     `json:"installComplete"`
-		PackType        int      `json:"packType"`
+		Private                    bool     `json:"_private"`
+		UUID                       string   `json:"uuid"`
+		ID                         int      `json:"id"`
+		Art                        string   `json:"art"`
+		Path                       string   `json:"path"`
+		VersionID                  int      `json:"versionId"`
+		Name                       string   `json:"name"`
+		MinMemory                  int      `json:"minMemory"`
+		RecMemory                  int      `json:"recMemory"`
+		Memory                     int      `json:"memory"`
+		Version                    string   `json:"version"`
+		Dir                        string   `json:"dir"`
+		Authors                    []string `json:"authors"`
+		McVersion                  string   `json:"mcVersion"`
+		ShellArgs                  string   `json:"shellArgs"`
+		JvmArgs                    string   `json:"jvmArgs"`
+		EmbeddedJre                bool     `json:"embeddedJre"`
+		JrePath                    string   `json:"jrePath"`
+		URL                        string   `json:"url"`
+		ArtURL                     string   `json:"artUrl"`
+		Width                      int      `json:"width"`
+		Height                     int      `json:"height"`
+		ModLoader                  string   `json:"modLoader"`
+		LastPlayed                 int      `json:"lastPlayed"`
+		IsModified                 bool     `json:"isModified"`
+		IsImport                   bool     `json:"isImport"`
+		CloudSaves                 bool     `json:"cloudSaves"`
+		HasInstMods                bool     `json:"hasInstMods"`
+		InstallComplete            bool     `json:"installComplete"`
+		ReleaseChannel             string   `json:"releaseChannel"`
+		Locked                     bool     `json:"locked"`
+		PreventMetaModInjection    bool     `json:"preventMetaModInjection"`
+		PotentiallyBrokenDismissed bool     `json:"potentiallyBrokenDismissed"`
+		PackType                   int      `json:"packType"`
 	}
 
 	AppStructure struct {
@@ -118,10 +124,31 @@ type (
 		Meta          AppMeta `json:"meta,omitempty"`
 	}
 	Instances struct {
-		Name        string `json:"name,omitempty"`
-		PackType    int    `json:"packType"`
-		PackId      int    `json:"packId,omitempty"`
-		PackVersion int    `json:"packVersion,omitempty"`
+		Name                       string `json:"name,omitempty"`
+		PackType                   int    `json:"packType"`
+		PackId                     int    `json:"packId,omitempty"`
+		PackVersion                int    `json:"packVersion,omitempty"`
+		Version                    string `json:"version,omitempty"`
+		UUID                       string `json:"uuid,omitempty"`
+		McVersion                  string `json:"mcVersion,omitempty"`
+		MinMemory                  int    `json:"minMemory,omitempty"`
+		RecMemory                  int    `json:"recMemory,omitempty"`
+		Memory                     int    `json:"memory,omitempty"`
+		JvmArgs                    string `json:"jvmArgs,omitempty"`
+		ShellArgs                  string `json:"shellArgs,omitempty"`
+		EmbeddedJre                bool   `json:"embeddedJre,omitempty"`
+		JrePath                    string `json:"jrePath,omitempty"`
+		ModLoader                  string `json:"modLoader,omitempty"`
+		IsModified                 bool   `json:"isModified,omitempty"`
+		IsImport                   bool   `json:"isImport,omitempty"`
+		HasInstMods                bool   `json:"hasInstMods,omitempty"`
+		InstallComplete            bool   `json:"installComplete,omitempty"`
+		ReleaseChannel             string `json:"releaseChannel,omitempty"`
+		Locked                     bool   `json:"locked,omitempty"`
+		PreventMetaModInjection    bool   `json:"preventMetaModInjection,omitempty"`
+		Private                    bool   `json:"_private,omitempty"`
+		LastPlayed                 int    `json:"lastPlayed,omitempty"`
+		PotentiallyBrokenDismissed bool   `json:"potentiallyBrokenDismissed,omitempty"`
 	}
 	InstanceLogs struct {
 		Created   int64             `json:"created,omitempty"`

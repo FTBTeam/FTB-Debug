@@ -79,10 +79,31 @@ func getInstances() (map[string]Instances, []InstanceLogs, error) {
 						continue
 					} else {
 						pIM[i.UUID] = Instances{
-							Name:        i.Name,
-							PackType:    i.PackType,
-							PackId:      i.ID,
-							PackVersion: i.VersionID,
+							Name:                       i.Name,
+							PackType:                   i.PackType,
+							PackId:                     i.ID,
+							PackVersion:                i.VersionID,
+							Version:                    i.Version,
+							UUID:                       i.UUID,
+							McVersion:                  i.McVersion,
+							MinMemory:                  i.MinMemory,
+							RecMemory:                  i.RecMemory,
+							Memory:                     i.Memory,
+							JvmArgs:                    i.JvmArgs,
+							ShellArgs:                  i.ShellArgs,
+							EmbeddedJre:                i.EmbeddedJre,
+							JrePath:                    i.JrePath,
+							ModLoader:                  i.ModLoader,
+							IsModified:                 i.IsModified,
+							IsImport:                   i.IsImport,
+							HasInstMods:                i.HasInstMods,
+							InstallComplete:            i.InstallComplete,
+							ReleaseChannel:             i.ReleaseChannel,
+							Locked:                     i.Locked,
+							PreventMetaModInjection:    i.PreventMetaModInjection,
+							Private:                    i.Private,
+							LastPlayed:                 i.LastPlayed,
+							PotentiallyBrokenDismissed: i.PotentiallyBrokenDismissed,
 						}
 
 						// Check for logs
