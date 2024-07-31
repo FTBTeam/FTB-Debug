@@ -49,12 +49,11 @@ jobs:
       - name: Codesign & Notarize
         if: matrix.goos == 'darwin'
         run: |
-          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-arm64 --options=runtime --timestamp
-          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-amd64 --options=runtime --timestamp
-          codesign -dvv ./out/ftb-debug-darwin-arm64
-          codesign -dvv ./out/ftb-debug-darwin-amd64
-          zip -r ftb-debug_signed.zip out/ftb-debug-darwin-arm64 out/ftb-debug-darwin-amd64
-          xcrun notarytool submit "ftb-debug_signed.zip" --apple-id "REPLACE_WITH_SECRET" --password "REPLACE_WITH_SECRET" --team-id REPLACE_ME --wait
+          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
+          codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
+          zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
+          echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
+          xcrun notarytool submit "ftb-debug_signed.zip" --key "./apple_api_key.p8" --key-id ${{ secrets.APPLE_API_KEY_ID }} --issuer ${{ secrets.APPLE_API_ISSUER }} --wait
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
