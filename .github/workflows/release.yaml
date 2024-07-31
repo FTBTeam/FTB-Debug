@@ -1,0 +1,66 @@
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Build and release
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/amd64, darwin/amd64, darwin/arm64
+        goos: [ linux, windows, darwin ]
+        goarch: [ amd64, arm64, arm ]
+        exclude:
+          - goarch: "arm"
+            goos: darwin
+          - goarch: "arm"
+            goos: windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Short SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup Go 1.22
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+          cache-dependency-path: go.sum
+
+      - name: Install dependencies
+        run: |
+          go get .
+
+      - name: Run tests
+        run: |
+          go test ./...
+
+      - name: Build
+        run: |
+          export GITHUB_SHA_SHORT=${{env.GITHUB_SHA_SHORT}}
+          make build/${{ matrix.goos }}/${{ matrix.goarch }}
+
+      - name: Codesign & Notarize
+        if: matrix.goos == 'darwin'
+        run: |
+          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-arm64-${{env.GITHUB_SHA_SHORT}} --options=runtime --timestamp
+          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-amd64-${{env.GITHUB_SHA_SHORT}} --options=runtime --timestamp
+          codesign -dvv ./out/ftb-debug-darwin-arm64-${{env.GITHUB_SHA_SHORT}}
+          codesign -dvv ./out/ftb-debug-darwin-amd64-${{env.GITHUB_SHA_SHORT}}
+          zip -r ftb-debug_signed.zip out/ftb-debug-darwin-arm64-${{env.GITHUB_SHA_SHORT}} out/ftb-debug-darwin-amd64-${{env.GITHUB_SHA_SHORT}}
+          xcrun notarytool submit "ftb-debug_signed.zip" --apple-id "REPLACE_WITH_SECRET" --password "REPLACE_WITH_SECRET" --team-id REPLACE_ME --wait
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
