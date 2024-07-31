@@ -49,7 +49,7 @@ jobs:
       - name: Codesign & Notarize
         if: matrix.goos == 'darwin'
         run: |
-          codesign -s "REPLACEME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
+          codesign -s "5372643C69B1D499BDF6EA772082E9CE99E85029" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
           codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
           zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
           echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
