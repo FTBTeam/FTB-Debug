@@ -71,10 +71,33 @@ jobs:
       - name: Build
         run: |
           make build/${{ matrix.goos }}/${{ matrix.goarch }}
+          
+      - name: Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.CSC_LINK }}
+          P12_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH > /dev/null
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH > /dev/null
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+          security list-keychain -d user -s $KEYCHAIN_PATH > /dev/null
 
       - name: Codesign & Notarize
-#          codesign -s "REPLACE_ME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
         run: |
+          codesign -s "5372643C69B1D499BDF6EA772082E9CE99E85029" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
           codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
           zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
           echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
