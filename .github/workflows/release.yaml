@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-windows:
     name: Build and release Windows
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [ windows ]
