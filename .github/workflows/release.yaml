@@ -9,19 +9,90 @@ permissions:
   packages: write
 
 jobs:
-  release:
-    name: Build and release
+  build-windows:
+    name: Build and release Windows
     runs-on: macos-latest
     strategy:
       matrix:
-        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/amd64, darwin/amd64, darwin/arm64
-        goos: [ linux, windows, darwin ]
+        goos: [ windows ]
+        goarch: [ amd64, arm64 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Short SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup Go 1.22
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+          cache-dependency-path: go.sum
+
+      - name: Install dependencies
+        run: |
+          go get .
+
+      - name: Run tests
+        run: |
+          go test ./...
+
+      - name: Build
+        run: |
+          make build/${{ matrix.goos }}/${{ matrix.goarch }}
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
+  build-linux:
+    name: Build and release Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [ linux ]
         goarch: [ amd64, arm64, arm ]
-        exclude:
-          - goarch: "arm"
-            goos: darwin
-          - goarch: "arm"
-            goos: windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Short SHA
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+
+      - name: Setup Go 1.22
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+          cache-dependency-path: go.sum
+
+      - name: Install dependencies
+        run: |
+          go get .
+
+      - name: Run tests
+        run: |
+          go test ./...
+
+      - name: Build
+        run: |
+          make build/${{ matrix.goos }}/${{ matrix.goarch }}
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
+
+  build-macos:
+    name: Build and release macOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        goos: [ darwin ]
+        goarch: [ amd64, arm64 ]
     steps:
       - uses: actions/checkout@v4
 
@@ -47,9 +118,8 @@ jobs:
           make build/${{ matrix.goos }}/${{ matrix.goarch }}
 
       - name: Codesign & Notarize
-        if: matrix.goos == 'darwin'
         run: |
-          codesign -s "5372643C69B1D499BDF6EA772082E9CE99E85029" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
+#          codesign -s "" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
           codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
           zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
           echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
