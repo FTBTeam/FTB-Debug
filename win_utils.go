@@ -4,10 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/pterm/pterm"
-	"github.com/shirou/gopsutil/v3/process"
 	"github.com/yusufpapurcu/wmi"
-	"strings"
 )
 
 type (
