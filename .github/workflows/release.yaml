@@ -73,8 +73,8 @@ jobs:
           make build/${{ matrix.goos }}/${{ matrix.goarch }}
 
       - name: Codesign & Notarize
+#          codesign -s "REPLACE_ME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
         run: |
-          codesign -s "REPLACE_ME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
           codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
           zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
           echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
