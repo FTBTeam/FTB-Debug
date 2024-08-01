@@ -18,23 +18,8 @@ jobs:
         goarch: [ amd64, arm64 ]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Short SHA
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.22
-          cache-dependency-path: go.sum
-
-      - name: Install dependencies
-        run: |
-          go get .
-
-      - name: Run tests
-        run: |
-          go test ./...
+      - uses: ./
+        name: "Common Setup"
 
       - name: Build
         run: |
@@ -56,23 +41,8 @@ jobs:
         goarch: [ amd64, arm64, arm ]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Short SHA
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.22
-          cache-dependency-path: go.sum
-
-      - name: Install dependencies
-        run: |
-          go get .
-
-      - name: Run tests
-        run: |
-          go test ./...
+      - uses: ./
+        name: "Common Setup"
 
       - name: Build
         run: |
@@ -95,23 +65,8 @@ jobs:
         goarch: [ amd64, arm64 ]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Short SHA
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
-
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.22
-          cache-dependency-path: go.sum
-
-      - name: Install dependencies
-        run: |
-          go get .
-
-      - name: Run tests
-        run: |
-          go test ./...
+      - uses: ./
+        name: "Common Setup"
 
       - name: Build
         run: |
@@ -119,7 +74,7 @@ jobs:
 
       - name: Codesign & Notarize
         run: |
-#          codesign -s "" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
+          codesign -s "REPLACE_ME" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
           codesign -dvv ./out/ftb-debug-darwin-${{ matrix.goarch }}
           zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
           echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
