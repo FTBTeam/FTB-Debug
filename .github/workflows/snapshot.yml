@@ -1,3 +1,4 @@
+name: "Snapshot Build"
 on:
   workflow_dispatch:
 
