@@ -3,9 +3,12 @@ description: "Common setup for all builds"
 runs:
   using: "composite"
   steps:
-    - name: Short SHA
+    - name: Setup Envs
       shell: bash
-      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+      env:
+        TOOL_VERSION: ${{github.event.release.tag_name}}
+      run: |
+        echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
     - name: Setup Go 1.22
       uses: actions/setup-go@v5

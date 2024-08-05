@@ -23,6 +23,7 @@ var (
 	re                   = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
 	cli                  *bool
 	GitCommit            string
+	Version              string
 	foundOverwolfVersion = false
 	failedToLoadSettings = false
 )
@@ -55,6 +56,9 @@ func main() {
 	if GitCommit == "" {
 		GitCommit = "Dev"
 	}
+	if Version == "" {
+		Version = "0.0.0"
+	}
 
 	var manifest Manifest
 
@@ -70,7 +74,7 @@ func main() {
 		putils.LettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
 		putils.LettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
 	pterm.DefaultCenter.Println(logo)
-	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", "2.0.0", GitCommit, time.Now().UTC().Format(time.RFC1123)))
+	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", Version, GitCommit, time.Now().UTC().Format(time.RFC1123)))
 	pterm.Debug.Println("Verbose logging enabled")
 
 	pterm.DefaultHeader.Println("System Info")
@@ -168,7 +172,7 @@ func main() {
 	}
 
 	// Compile manifest
-	manifest.Version = "2.0.1-Go"
+	manifest.Version = fmt.Sprintf("%s-go", Version)
 	manifest.MetaDetails = MetaDetails{
 		InstanceCount:     len(instances),
 		Today:             time.Now().UTC().Format(time.DateOnly),
