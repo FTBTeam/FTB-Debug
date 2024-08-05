@@ -1,7 +1,3 @@
-build/linux/arm:
-	$(info Building debug tool for linux arm)
-	GOOS=linux GOARCH=arm go build -o out/ftb-debug-linux-arm -trimpath -buildvcs=false -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(TOOL_VERSION)'"
-
 build/linux/arm64:
 	$(info Building debug tool for linux arm64)
 	GOOS=linux GOARCH=arm64 go build -o out/ftb-debug-linux-arm64 -trimpath -buildvcs=false -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(TOOL_VERSION)'"
