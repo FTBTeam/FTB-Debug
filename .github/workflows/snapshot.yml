@@ -55,7 +55,7 @@ jobs:
 
   build-macos:
     name: Build and release macOS
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [ darwin ]
