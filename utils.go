@@ -99,41 +99,12 @@ func doesPathExist(filePath string) bool {
 	return false
 }
 
-/*func uploadFile(filePath string, comment string) {
-	pterm.Debug.Println(filePath)
-	fileName := filepath.Base(filePath)
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		pterm.Error.Printfln("Uploading %s: failed to open file\n%s", comment, err)
-		return
-	}
-	if fileName == "launcher_profiles.json" {
-		data, err = sanitizeProfile(data)
-		if err != nil {
-			pterm.Warning.Println("Error sanitizing launcher_profiles.json")
-			return
-		}
-	} else if fileName == "settings.json" {
-		data, err = sanitizeSettings(data)
-		if err != nil {
-			pterm.Warning.Println("Error sanitizing settings.json")
-			return
-		}
-	} else {
-		data = sanitizeLogs(data)
-	}
-	r, err := uploadRequest(data, "")
-	if err != nil {
-		pterm.Error.Printfln("Uploading %s: failed to upload\n%s", comment, err)
-		return
-	}
-	pterm.Info.Printfln("Uploaded [%s#%s]", r.Data.ID, comment)
-}*/
-
 func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 	// http put request to https://pste.me/v1/paste
+
+	sanitizedData := sanitize(data)
 	client := &http.Client{}
-	req, err := http.NewRequest("PUT", "https://pste.me/v1/paste", bytes.NewBuffer(data))
+	req, err := http.NewRequest("PUT", "https://pste.me/v1/paste", bytes.NewBuffer(sanitizedData))
 	if err != nil {
 		return PsteMeResp{}, err
 	}
@@ -162,51 +133,16 @@ func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 	return r, nil
 }
 
-func sanitizeProfile(data []byte) ([]byte, error) {
-	var i interface{}
-	if data != nil {
-		if err := json.Unmarshal(data, &i); err != nil {
-			pterm.Error.Println("Error reading launcher profile:", err)
-			pterm.Debug.Println("JSON data:", string(data))
-			return nil, err
-		}
-		if m, ok := i.(map[string]interface{}); ok {
-			delete(m, "authenticationDatabase")
-			delete(m, "clientToken")
-		}
-		output, err := json.MarshalIndent(i, "", "  ")
-		if err != nil {
-			pterm.Error.Println("Error marshaling json:", err)
-			return nil, err
-		}
-		return output, nil
-	}
-	return nil, fmt.Errorf("unable to sanitize profile, parameter data is nil")
-}
-
-func sanitizeSettings(data []byte) ([]byte, error) {
-	if data != nil {
-		var i AppSettings
-		if err := json.Unmarshal(data, &i); err != nil {
-			pterm.Error.Println("Error reading app settings:", err)
-			pterm.Debug.Println("JSON data:", string(data))
-			return nil, err
-		}
-		i.SessionString = "************************"
-		output, err := json.MarshalIndent(i, "", "  ")
-		if err != nil {
-			pterm.Error.Println("Error marshaling json:", err)
-			return nil, err
-		}
-		return output, nil
-	}
-	return nil, fmt.Errorf("unable to sanitize settings, parameter data is nil")
-}
-
-func sanitizeLogs(data []byte) []byte {
+func sanitize(data []byte) []byte {
 	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M\.R3[a-zA-Z0-9._+!\*\$/-]+)`)
+	reWindowsPath := regexp.MustCompile(`((?:[A-Za-z]:)\\Users\\)([^\\]+)(\\.+)`)
+	reMacPath := regexp.MustCompile(`(/Users/)([^/\\]+)(/.+)`)
+	reLinuxPath := regexp.MustCompile(`(/home/)([^/\\]+)(/.+)`)
 
-	clean := reToken.ReplaceAll(data, []byte("${1}******AUTHTOKEN******$3"))
+	clean := reToken.ReplaceAll(data, []byte("$1******AUTHTOKEN******$3"))
+	clean = reWindowsPath.ReplaceAll(clean, []byte("$1***$3"))
+	clean = reMacPath.ReplaceAll(clean, []byte("$1***$3"))
+	clean = reLinuxPath.ReplaceAll(clean, []byte("$1***$3"))
 	return clean
 }
 
