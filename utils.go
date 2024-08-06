@@ -135,9 +135,9 @@ func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 
 func sanitize(data []byte) []byte {
 	reToken := regexp.MustCompile(`(^|")(ey[a-zA-Z0-9._-]+|Ew[a-zA-Z0-9._+/-]+=|M\.R3[a-zA-Z0-9._+!\*\$/-]+)`)
-	reWindowsPath := regexp.MustCompile(`((?:[A-Za-z]:)\\Users\\)([^\\]+)(\\.+)`)
-	reMacPath := regexp.MustCompile(`(/Users/)([^/\\]+)(/.+)`)
-	reLinuxPath := regexp.MustCompile(`(/home/)([^/\\]+)(/.+)`)
+	reWindowsPath := regexp.MustCompile(`((?:[A-Za-z]:)\\Users\\)([^/\\\r\n\t\v]+)(\\.+)?`)
+	reMacPath := regexp.MustCompile(`(/Users/)([^/\\\r\n\t\v]+)(/.+)?`)
+	reLinuxPath := regexp.MustCompile(`(/home/)([^/\\\r\n\t\v]+)(/.+)?`)
 
 	clean := reToken.ReplaceAll(data, []byte("$1******AUTHTOKEN******$3"))
 	clean = reWindowsPath.ReplaceAll(clean, []byte("$1***$3"))
