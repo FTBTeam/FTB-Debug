@@ -5,10 +5,9 @@ runs:
   steps:
     - name: Setup Envs
       shell: bash
-      env:
-        TOOL_VERSION: ${{github.event.release.tag_name}}
       run: |
         echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+        echo "TOOL_VERSION: ${{github.event.release.tag_name}}" >> $GITHUB_ENV
 
     - name: Setup Go 1.22
       uses: actions/setup-go@v5
