@@ -109,7 +109,7 @@ func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
 		return PsteMeResp{}, err
 	}
 	query := req.URL.Query()
-	query.Add("expires_at", strconv.FormatInt(time.Now().Add(time.Hour*1440).Unix(), 10))
+	query.Add("expires_at", strconv.FormatInt(time.Now().Add(time.Hour*2190).Unix()-time.Now().Unix(), 10))
 	if lang != "" {
 		query.Add("language", lang)
 	}
