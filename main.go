@@ -21,7 +21,6 @@ var (
 	logMw                io.Writer
 	owUID                = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 	re                   = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	cli                  *bool
 	GitCommit            string
 	Version              string
 	foundOverwolfVersion = false
@@ -31,7 +30,6 @@ var (
 func init() {
 	var err error
 	verboseLogging := flag.Bool("v", false, "Enable verbose logging")
-	cli = flag.Bool("cli", false, "Only output the support code in console")
 	noColours := flag.Bool("no-colours", false, "Disable colours in output")
 	flag.Parse()
 
@@ -63,11 +61,8 @@ func main() {
 	var manifest Manifest
 
 	defer cleanup(logFile)
-	if *cli {
-		logToConsole(false)
-	} else {
-		logToConsole(true)
-	}
+	logMw = io.MultiWriter(os.Stdout, NewCustomWriter(logFile))
+	pterm.SetDefaultOutput(logMw)
 
 	logo, _ := pterm.DefaultBigText.WithLetters(
 		putils.LettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),

@@ -17,6 +17,7 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+	"unicode"
 )
 
 func cleanup(logFile *os.File) {
@@ -146,15 +147,6 @@ func sanitize(data []byte) []byte {
 	return clean
 }
 
-func logToConsole(b bool) {
-	if b {
-		logMw = io.MultiWriter(os.Stdout, logFile)
-		pterm.SetDefaultOutput(logMw)
-	} else {
-		pterm.SetDefaultOutput(logFile)
-	}
-}
-
 func doesBinExist() {
 	binExists := doesPathExist(filepath.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
@@ -235,4 +227,29 @@ func isActiveProfileInProfiles(profiles Profiles) bool {
 		}
 	}
 	return false
+}
+
+// CustomWriter to strip ascii characters
+type CustomWriter struct {
+	writer io.Writer
+}
+
+// NewCustomWriter creates a new CustomWriter.
+func NewCustomWriter(writer io.Writer) *CustomWriter {
+	return &CustomWriter{writer: writer}
+}
+
+// Write implements the io.Writer interface.
+func (cw *CustomWriter) Write(p []byte) (n int, err error) {
+
+	re := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	stripped := re.ReplaceAll(p, []byte{})
+
+	filtered := make([]byte, 0, len(stripped))
+	for _, b := range stripped {
+		if b == '\n' || (unicode.IsPrint(rune(b)) || b < 0x20 || b > 0x7E) {
+			filtered = append(filtered, b)
+		}
+	}
+	return cw.writer.Write(filtered)
 }
