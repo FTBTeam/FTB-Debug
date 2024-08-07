@@ -20,6 +20,18 @@ var (
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "",
 		},
+		"https://piston-meta.mojang.com/mc/game/version_manifest_v2.json": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
+		"https://launchermeta.mojang.com/mc/game/version_manifest_v2.json": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
 		"https://maven.fabricmc.net": {
 			Method:             "HEAD",
 			ValidateResponse:   false,

@@ -88,7 +88,7 @@ func main() {
 		} else if !n.Success && !n.Error {
 			pterm.Warning.Println(n.Status)
 		} else {
-			pterm.Success.Println(n.Status)
+			pterm.Success.Printfln("%s: %s", n.URL, n.Status)
 		}
 	}
 
