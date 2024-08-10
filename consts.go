@@ -56,6 +56,18 @@ var (
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
 		},
+		"https://apps.modpacks.ch/modpacks/art/112/neotechx512.png": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
+		"https://dist.creeper.host/modpacks/art/112/neotechx512.png": {
+			Method:             "HEAD",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
 		"https://api.creeper.host/api/health": {
 			Method:             "HEAD",
 			ValidateResponse:   false,
