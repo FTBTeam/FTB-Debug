@@ -32,6 +32,18 @@ var (
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "",
 		},
+		"https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
+		"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.4_7.zip": {
+			Method:             "HEAD",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedReponse:    "",
+		},
 		"https://maven.fabricmc.net": {
 			Method:             "HEAD",
 			ValidateResponse:   false,
