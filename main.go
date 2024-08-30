@@ -167,7 +167,7 @@ func main() {
 	}
 
 	// Compile manifest
-	manifest.Version = fmt.Sprintf("%s-go", Version)
+	manifest.Version = "2.0.5-go"
 	manifest.MetaDetails = MetaDetails{
 		InstanceCount:     len(instances),
 		Today:             time.Now().UTC().Format(time.DateOnly),
