@@ -1,4 +1,4 @@
-package main
+package dbg
 
 import (
 	"net/http"
