@@ -3,9 +3,7 @@ package dbg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
-	"github.com/pterm/pterm/putils"
 	"io"
 	"os"
 	"os/user"
@@ -20,8 +18,6 @@ var (
 	logMw                io.Writer
 	owUID                = "cmogmmciplgmocnhikmphehmeecmpaggknkjlbag"
 	re                   = regexp.MustCompile(`(?m)[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`)
-	GitCommit            string
-	Version              string
 	foundOverwolfVersion = false
 	failedToLoadSettings = false
 )
@@ -33,26 +29,11 @@ func RunDebug() {
 		pterm.Fatal.Println(err)
 	}
 
-	if GitCommit == "" {
-		GitCommit = "Dev"
-	}
-	if Version == "" {
-		Version = "0.0.0"
-	}
-
 	var manifest Manifest
 
 	defer cleanup(logFile)
 	logMw = io.MultiWriter(os.Stdout, NewCustomWriter(logFile))
 	pterm.SetDefaultOutput(logMw)
-
-	logo, _ := pterm.DefaultBigText.WithLetters(
-		putils.LettersFromStringWithStyle("F", pterm.NewStyle(pterm.FgCyan)),
-		putils.LettersFromStringWithStyle("T", pterm.NewStyle(pterm.FgGreen)),
-		putils.LettersFromStringWithStyle("B", pterm.NewStyle(pterm.FgRed))).Srender()
-	pterm.DefaultCenter.Println(logo)
-	pterm.DefaultCenter.WithCenterEachLineSeparately().Println(fmt.Sprintf("Version: %s-%s\n%s", Version, GitCommit, time.Now().UTC().Format(time.RFC1123)))
-	pterm.Debug.Println("Verbose logging enabled")
 
 	pterm.DefaultHeader.Println("System Info")
 	getOSInfo()
@@ -181,22 +162,5 @@ func RunDebug() {
 		}
 		codeStyle := pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold)
 		pterm.DefaultBasicText.Printfln("Please provide this code to support: %s", codeStyle.Sprintf("dbg:%s", request.Data.ID))
-	}
-	pterm.Info.Println("Press ESC to exit...")
-
-	if err := keyboard.Open(); err != nil {
-		panic(err)
-	}
-	defer func() {
-		_ = keyboard.Close()
-	}()
-	for {
-		_, key, err := keyboard.GetKey()
-		if err != nil {
-			panic(err)
-		}
-		if key == keyboard.KeyEsc {
-			break
-		}
 	}
 }

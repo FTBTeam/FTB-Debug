@@ -4,6 +4,7 @@ package dbg
 
 import (
 	"fmt"
+	wmi "github.com/yusufpapurcu/wmi"
 )
 
 type (
