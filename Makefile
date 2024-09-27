@@ -22,4 +22,4 @@ build/darwin/arm64:
 	$(info Building debug tool for darwin arm64)
 	GOOS=darwin GOARCH=arm64 go build -o out/ftb-debug-darwin-arm64 -trimpath -buildvcs=false -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
 
-build_all: build/linux/arm build/linux/arm64 build/linux/amd64 build/windows/arm64 build/windows/amd64 build/darwin/amd64 build/darwin/arm64
+build_all: build/linux/arm64 build/linux/amd64 build/windows/arm64 build/windows/amd64 build/darwin/amd64 build/darwin/arm64
