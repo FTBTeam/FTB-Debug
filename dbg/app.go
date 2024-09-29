@@ -1,4 +1,4 @@
-package main
+package dbg
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"ftb-debug/v2/shared"
 	"github.com/hashicorp/go-version"
 	"github.com/pterm/pterm"
 	"io"
@@ -39,7 +40,7 @@ func loadAppSettings() error {
 		var appSettings []byte
 		var err error
 		appSettingsPath := filepath.Join(ftbApp.InstallLocation, "storage", "settings.json")
-		doesAppSettingsExist := doesPathExist(appSettingsPath)
+		doesAppSettingsExist := shared.DoesPathExist(appSettingsPath)
 		if doesAppSettingsExist {
 			appSettings, err = os.ReadFile(appSettingsPath)
 			if err != nil {
@@ -61,7 +62,7 @@ func loadAppSettings() error {
 }
 
 func getInstances() (map[string]Instances, []InstanceLogs, error) {
-	instancesExists := doesPathExist(ftbApp.Settings.InstanceLocation)
+	instancesExists := shared.DoesPathExist(ftbApp.Settings.InstanceLocation)
 	if instancesExists {
 		pterm.Info.Println("Instance Location: ", ftbApp.Settings.InstanceLocation)
 		instances, _ := os.ReadDir(filepath.Join(ftbApp.Settings.InstanceLocation))
@@ -109,7 +110,7 @@ func getInstances() (map[string]Instances, []InstanceLogs, error) {
 						// Check for logs
 						logsPath := filepath.Join(ftbApp.Settings.InstanceLocation, name, "logs")
 						logs := make(map[string]string)
-						if doesPathExist(logsPath) {
+						if shared.DoesPathExist(logsPath) {
 							logs, err = getInstanceLogs(logsPath)
 							if err != nil {
 								pterm.Error.Printfln("Error getting instance logs: %s", err.Error())
@@ -119,7 +120,7 @@ func getInstances() (map[string]Instances, []InstanceLogs, error) {
 						// Check for crash-reports
 						crashLogsPath := filepath.Join(ftbApp.Settings.InstanceLocation, name, "crash-reports")
 						crashLogs := make(map[string]string)
-						if doesPathExist(crashLogsPath) {
+						if shared.DoesPathExist(crashLogsPath) {
 							crashLogs, err = getInstanceLogs(crashLogsPath)
 							if err != nil {
 								pterm.Error.Printfln("Error getting instance crash logs: %s", err.Error())
@@ -177,7 +178,7 @@ func getAppVersion() (AppMeta, error) {
 					return versions[i].GreaterThan(versions[j])
 				})
 				pterm.Debug.Println("Found versions:", versions)
-				if !doesPathExist(metaPath) {
+				if !shared.DoesPathExist(metaPath) {
 					metaPath = filepath.Join(overwolfAppPath, versions[0].String(), "meta.json")
 				}
 			}
@@ -190,7 +191,7 @@ func getAppVersion() (AppMeta, error) {
 		return AppMeta{}, errors.New("unknown OS, could you let us know what operating system you are using so we can add our checks")
 	}
 
-	installExists := doesPathExist(metaPath)
+	installExists := shared.DoesPathExist(metaPath)
 	if !installExists {
 		return AppMeta{}, errors.New("app meta not found")
 	}
@@ -209,7 +210,7 @@ func getAppVersion() (AppMeta, error) {
 
 func getProfiles() (Profiles, error) {
 	profilesPath := filepath.Join(ftbApp.InstallLocation, "profiles.json")
-	profilesExists := doesPathExist(profilesPath)
+	profilesExists := shared.DoesPathExist(profilesPath)
 	if profilesExists {
 		profilesRaw, err := os.ReadFile(profilesPath)
 		if err != nil {
@@ -301,7 +302,7 @@ func getInstanceLogs(path string) (map[string]string, error) {
 }
 
 func getMiscFile(path string) (string, error) {
-	exists := doesPathExist(path)
+	exists := shared.DoesPathExist(path)
 	if !exists {
 		return "", fmt.Errorf("file %s does not exist", path)
 	}

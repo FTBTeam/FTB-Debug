@@ -1,10 +1,10 @@
 //go:build windows
 
-package main
+package dbg
 
 import (
 	"fmt"
-	"github.com/yusufpapurcu/wmi"
+	wmi "github.com/yusufpapurcu/wmi"
 )
 
 type (

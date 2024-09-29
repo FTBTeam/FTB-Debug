@@ -1,10 +1,11 @@
-package main
+package dbg
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"ftb-debug/v2/shared"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -44,7 +45,7 @@ func ByteCountIEC(b int64) string {
 }
 
 func validateJson(message string, filePath string) (bool, error) {
-	jsonF := doesPathExist(filePath)
+	jsonF := shared.DoesPathExist(filePath)
 	if jsonF {
 		jsonFile, err := os.Open(filePath)
 		if err != nil {
@@ -91,13 +92,6 @@ func getOSInfo() {
 	if javaHome != "" {
 		pterm.Info.Println("Java Home:", javaHome)
 	}
-}
-
-func doesPathExist(filePath string) bool {
-	if _, err := os.Stat(filePath); err == nil {
-		return true
-	}
-	return false
 }
 
 func uploadRequest(data []byte, lang string) (PsteMeResp, error) {
@@ -148,7 +142,7 @@ func sanitize(data []byte) []byte {
 }
 
 func doesBinExist() {
-	binExists := doesPathExist(filepath.Join(ftbApp.InstallLocation, "bin"))
+	binExists := shared.DoesPathExist(filepath.Join(ftbApp.InstallLocation, "bin"))
 	if binExists {
 		ftbApp.Structure.Bin.Exists = true
 	}
@@ -156,21 +150,21 @@ func doesBinExist() {
 
 func locateFTBAFolder() (string, error) {
 	if runtime.GOOS == "windows" {
-		if doesPathExist(filepath.Join(os.Getenv("localappdata"), ".ftba")) {
+		if shared.DoesPathExist(filepath.Join(os.Getenv("localappdata"), ".ftba")) {
 			return filepath.Join(os.Getenv("localappdata"), ".ftba"), nil
-		} else if doesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+		} else if shared.DoesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
 			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "darwin" {
-		if doesPathExist(filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
+		if shared.DoesPathExist(filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba")) {
 			return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
 		}
 	} else if runtime.GOOS == "linux" {
-		if doesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
+		if shared.DoesPathExist(filepath.Join(ftbApp.User.HomeDir, ".ftba")) {
 			return filepath.Join(ftbApp.User.HomeDir, ".ftba"), nil
 		} else {
 			return "", errors.New("unable to find .ftba directory")
