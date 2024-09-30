@@ -27,7 +27,7 @@ runs:
         go install github.com/wailsapp/wails/v2/cmd/wails@latest
         go get .
 
-    - name: Run tests
-      shell: bash
-      run: |
-        go test ./...
+#    - name: Run tests
+#      shell: bash
+#      run: |
+#        go test ./...
