@@ -10,12 +10,12 @@ jobs:
   build-all:
     name: Build and release all platforms
     runs-on: ubuntu-latest
-    strategy:
-      # Failure in one platform build won't impact the others
-      fail-fast: false
-      matrix:
-        goos: [ linux, windows, darwin ]
-        goarch: [ amd64, arm64 ]
+#    strategy:
+#      # Failure in one platform build won't impact the others
+#      fail-fast: false
+#      matrix:
+#        goos: [ linux, windows, darwin ]
+#        goarch: [ amd64, arm64 ]
     steps:
       - uses: actions/checkout@v4
       - uses: ./
