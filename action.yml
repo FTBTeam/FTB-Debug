@@ -29,7 +29,7 @@ runs:
 
     - name: Install Linux Wails deps
       if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+      run: sudo apt-get update && sudo apt-get install libgtk-3-0 libgtk-3-dev libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
       shell: bash
 
 #    - name: Run tests
