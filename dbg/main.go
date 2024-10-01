@@ -130,7 +130,7 @@ func RunDebug() {
 	}
 
 	// Compile manifest
-	manifest.Version = "2.0.5-go"
+	manifest.Version = "v2.0.5-go"
 	manifest.MetaDetails = MetaDetails{
 		InstanceCount:     len(instances),
 		Today:             time.Now().UTC().Format(time.DateOnly),
