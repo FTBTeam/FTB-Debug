@@ -25,13 +25,12 @@ build/windows/amd64:
 build/darwin/amd64:
 	$(info Building debug tool for darwin amd64)
 	wails build -clean -platform darwin/amd64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
-	ls -al
 	mkdir -p ./out
-	cd ./build/bin; zip -r ./out/ftb-debug-darwin-amd64.zip ftb-debug-ui.app
+	cd ./build/bin; zip -r ../../out/ftb-debug-darwin-amd64.zip ftb-debug-ui.app
 
 build/darwin/arm64:
 	$(info Building debug tool for darwin arm64)
 	wails build -clean -platform darwin/arm64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
 	mkdir -p ./out
-	cd ./build/bin; zip -r ./out/ftb-debug-darwin-arm64.zip ftb-debug-ui.app
+	cd ./build/bin; zip -r ../../out/ftb-debug-darwin-arm64.zip ftb-debug-ui.app
 build_all: build/windows/arm64 build/windows/amd64 build/darwin/amd64 build/darwin/arm64
