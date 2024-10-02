@@ -21,6 +21,10 @@ jobs:
       - uses: ./
         name: "Common Setup"
 
+      - name: Doctor
+        run: |
+          wails doctor
+
       - name: Build
         run: |
           make build/${{ matrix.goos }}/${{ matrix.goarch }}
@@ -42,11 +46,15 @@ jobs:
     strategy:
       matrix:
         goos: [ linux ]
-        goarch: [ amd64, arm64 ]
+        goarch: [ amd64 ]
     steps:
       - uses: actions/checkout@v4
       - uses: ./
         name: "Common Setup"
+
+      - name: Doctor
+        run: |
+          wails doctor
 
       - name: Build
         run: |
@@ -69,6 +77,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./
         name: "Common Setup"
+
+      - name: Doctor
+        run: |
+          wails doctor
 
       - name: Build
         run: |
