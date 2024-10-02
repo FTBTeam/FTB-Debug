@@ -1,14 +1,14 @@
-build/linux/arm64:
-	$(info Building debug tool for linux arm64)
-	wails build -clean -platform linux/arm64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
-	mkdir -p ./out
-	mv ./build/bin/ftb-debug-ui ./out/ftb-debug-linux-arm64
-
-build/linux/amd64:
-	$(info Building debug tool for linux amd64)
-	wails build -clean -platform linux/amd64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
-	mkdir -p ./out
-	mv ./build/bin/ftb-debug-ui ./out/ftb-debug-windows-amd64
+#build/linux/arm64:
+#	$(info Building debug tool for linux arm64)
+#	wails build -clean -platform linux/arm64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
+#	mkdir -p ./out
+#	mv ./build/bin/ftb-debug-ui ./out/ftb-debug-linux-arm64
+#
+#build/linux/amd64:
+#	$(info Building debug tool for linux amd64)
+#	wails build -clean -platform linux/amd64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
+#	mkdir -p ./out
+#	mv ./build/bin/ftb-debug-ui ./out/ftb-debug-windows-amd64
 
 build/windows/arm64:
 	$(info Building debug tool for windows arm64)
