@@ -35,4 +35,4 @@ jobs:
           name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
           overwrite: true
           path: |
-            build/bin/*
+            out/*
