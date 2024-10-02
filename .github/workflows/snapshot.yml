@@ -9,7 +9,7 @@ permissions:
 jobs:
   build-all:
     name: Build and release all platforms
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 #    strategy:
 #      # Failure in one platform build won't impact the others
 #      fail-fast: false
@@ -35,4 +35,4 @@ jobs:
           name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
           overwrite: true
           path: |
-            out/*
+            build/bin/*
