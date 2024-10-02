@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: |
-          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=${{GITHUB_SHA_SHORT}}' -X 'main.Version=${{GITHUB_REF_NAME}}'"
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=${{env.GITHUB_SHA_SHORT}}' -X 'main.Version=${{env.GITHUB_REF_NAME}}'"
           mkdir -p ./out
           mv ./build/bin/ftb-debug-ui.exe ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.exe
 
