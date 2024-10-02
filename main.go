@@ -20,9 +20,7 @@ func main() {
 	err := wails.Run(&options.App{
 		Title:         "FTB Debug Tool",
 		Width:         700,
-		Height:        350,
-		MinWidth:      700,
-		MinHeight:     350,
+		Height:        300,
 		DisableResize: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

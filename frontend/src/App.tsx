@@ -69,21 +69,21 @@ function App() {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex gap-4">
-                <Card className="w-[300px] flex-1">
+                <Card className="w-[300px] flex flex-col">
                     <CardHeader>
                         <CardTitle>Diagnostics</CardTitle>
                         <CardDescription>Run a diagnostics check and generate a debug code</CardDescription>
                     </CardHeader>
-                    <CardFooter>
+                    <CardFooter className="mt-auto">
                         <Button onClick={runDebug} disabled={debugRunning || fixesRunning}>Run</Button>
                     </CardFooter>
                 </Card>
-                <Card className="w-[300px] flex-1">
+                <Card className="w-[300px] flex flex-col">
                     <CardHeader>
                         <CardTitle>Fix Common Issues</CardTitle>
                         <CardDescription>Fixes common issues with the app</CardDescription>
                     </CardHeader>
-                    <CardFooter>
+                    <CardFooter className="mt-auto">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" disabled={debugRunning || fixesRunning}>Run</Button>
