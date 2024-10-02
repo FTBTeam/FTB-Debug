@@ -25,6 +25,7 @@ build/windows/amd64:
 build/darwin/amd64:
 	$(info Building debug tool for darwin amd64)
 	wails build -clean -platform darwin/amd64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
+	ls -al
 	mkdir -p ./out
 	cd ./build/bin; zip -r ./out/ftb-debug-darwin-amd64.zip ftb-debug-ui.app
 
