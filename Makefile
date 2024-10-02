@@ -33,4 +33,4 @@ build/darwin/arm64:
 	wails build -clean -platform darwin/arm64 -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
 	mkdir -p ./out
 	cd ./build/bin; zip -r ./out/ftb-debug-darwin-arm64.zip ./build/bin/ftb-debug-ui.app
-build_all: build/linux/arm64 build/linux/amd64 build/windows/arm64 build/windows/amd64 build/darwin/amd64 build/darwin/arm64
+build_all: build/windows/arm64 build/windows/amd64 build/darwin/amd64 build/darwin/arm64
