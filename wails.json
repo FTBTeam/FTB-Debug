@@ -7,7 +7,7 @@
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "Gareth Williams",
-    "email": "gaz492@gmail.com"
+    "name": "Feed-the-Beast",
+    "email": "admin@feed-the-beast.com"
   }
 }
