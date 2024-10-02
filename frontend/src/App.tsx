@@ -29,6 +29,8 @@ import {Input} from "@/components/ui/input";
 import {CopyIcon, ExclamationTriangleIcon} from "@radix-ui/react-icons";
 import {BrowserOpenURL} from "../wailsjs/runtime";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
+import { toast } from "@/hooks/use-toast"
+import { ToastAction } from "@/components/ui/toast"
 
 function App() {
     const [debugCode, setDebugCode] = useState('');
@@ -63,6 +65,15 @@ function App() {
             setFixesRunning(false);
             console.error(err);
             setError(err);
+        })
+    }
+
+    function copyDebugCode() {
+        navigator.clipboard.writeText(debugCode);
+        console.log("Copied debug code to clipboard");
+        toast({
+            description: "Copied debug code to clipboard",
+            className: "flex flex-col w-[300px] ml-auto border-green-500",
         })
     }
 
@@ -151,7 +162,7 @@ function App() {
                                 readOnly
                             />
                         </div>
-                        <Button type="submit" size="sm" className="px-3">
+                        <Button type="submit" size="sm" className="px-3" onClick={copyDebugCode}>
                             <span className="sr-only">Copy</span>
                             <CopyIcon className="h-4 w-4"/>
                         </Button>
