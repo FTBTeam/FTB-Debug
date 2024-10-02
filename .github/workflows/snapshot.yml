@@ -30,10 +30,12 @@ jobs:
           mkdir -p ./out
           mv ./build/bin/ftb-debug-ui.exe ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.exe
 
-      - name: Release artifacts
-        uses: softprops/action-gh-release@v2
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
             out/*
 
   build-linux:
@@ -59,10 +61,12 @@ jobs:
           mkdir -p ./out
           mv ./build/bin/ftb-debug-ui ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
 
-      - name: Release artifacts
-        uses: softprops/action-gh-release@v2
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
             out/*
 
   build-macos:
@@ -88,8 +92,10 @@ jobs:
           mkdir -p ./out
           cd ./build/bin; zip -r ../../out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip ftb-debug-ui.app
 
-      - name: Release artifacts
-        uses: softprops/action-gh-release@v2
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
             out/*
