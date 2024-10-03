@@ -42,6 +42,7 @@ function App() {
     const [error, setError] = useState('');
 
     function runDebug() {
+        setError("")
         setDebugRunning(true);
 
         RunDebug().then((result) => {
@@ -56,11 +57,16 @@ function App() {
     }
 
     function runFixes() {
+        setError("");
         setFixesRunning(true);
 
         RunCommonFixes().then((result) => {
             setFixesRunning(false);
             console.log(result);
+            toast({
+                description: "Fixed common issues",
+                className: "flex flex-col w-[300px] ml-auto border-green-500",
+            })
         }).catch((err) => {
             setFixesRunning(false);
             console.error(err);
