@@ -9,5 +9,12 @@
   "author": {
     "name": "Feed-the-Beast",
     "email": "admin@feed-the-beast.com"
+  },
+  "info": {
+    "companyName": "Feed-the-Beast",
+    "productName": "FTB Debug",
+    "productVersion": "2.1.0",
+    "copyright": "Feed-the-Beast",
+    "comments": "Debug tool for the FTB App"
   }
 }
