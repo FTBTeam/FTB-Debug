@@ -1,6 +1,7 @@
 name: "Build & Sign Snapshot"
 on:
   workflow_dispatch:
+  pull_request:
 
 permissions:
   contents: write
