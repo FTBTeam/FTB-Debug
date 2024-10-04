@@ -1,0 +1,140 @@
+name: "Build & Sign Snapshot"
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-windows:
+    name: Build and sign Windows snapshot
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        goos: [ windows ]
+        goarch: [ amd64, arm64 ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        name: "Common Setup"
+
+      - name: Doctor
+        run: |
+          wails doctor
+
+      - name: Build
+        run: |
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=${{env.GITHUB_SHA_SHORT}}' -X 'main.Version=${{env.GITHUB_REF_NAME}}'"
+          mkdir -p ./out
+          mv ./build/bin/ftb-debug-ui.exe ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.exe
+
+      - name: Windows Signing
+        run: |
+          dotnet tool install --global AzureSignTool --version 5.0.0
+          azuresigntool sign -kvu ${{ secrets.AZURE_KEY_VAULT_URL }} -kvi ${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }} -kvs ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }} -kvc ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE_NAME }} -kvt ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }} -tr http://timestamp.digicert.com -v out\ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.exe
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
+
+  build-linux:
+    name: Build and release Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [ linux ]
+        goarch: [ amd64 ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        name: "Common Setup"
+
+      - name: Linux Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+
+      - name: Doctor
+        run: |
+          wails doctor
+
+      - name: Build
+        run: |
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
+          mkdir -p ./out
+          mv ./build/bin/ftb-debug-ui ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
+
+
+  build-macos:
+    name: Build and release macOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        goos: [ darwin ]
+        goarch: [ amd64, arm64 ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        name: "Common Setup"
+
+      - name: Doctor
+        run: |
+          wails doctor
+
+      - name: Build
+        run: |
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'shared.GitCommit=$(GITHUB_SHA_SHORT)' -X 'shared.Version=$(GITHUB_REF_NAME)'"
+          mkdir -p ./out
+          cd ./build/bin; zip -r ../../out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip ftb-debug-ui.app
+
+      - name: Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.CSC_LINK }}
+          P12_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH > /dev/null
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH > /dev/null
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH > /dev/null
+          security list-keychain -d user -s $KEYCHAIN_PATH > /dev/null
+
+      - name: Codesign & Notarize
+        run: |
+          codesign -s "5372643C69B1D499BDF6EA772082E9CE99E85029" -v ./out/ftb-debug-darwin-${{ matrix.goarch }} --options=runtime --timestamp
+          codesign -dv ./out/ftb-debug-darwin-${{ matrix.goarch }}
+          zip -r ftb-debug_signed.zip out/ftb-debug-darwin-${{ matrix.goarch }}
+          echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
+          xcrun notarytool submit "ftb-debug_signed.zip" --key "./apple_api_key.p8" --key-id ${{ secrets.APPLE_API_KEY_ID }} --issuer ${{ secrets.APPLE_API_ISSUER }} --wait
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
+          overwrite: true
+          path: |
+            out/*
