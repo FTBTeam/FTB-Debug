@@ -10,10 +10,10 @@ runs:
       run: |
         echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
-    - name: Setup Go 1.22
+    - name: Setup Go 1.23
       uses: actions/setup-go@v5
       with:
-        go-version: 1.22
+        go-version: 1.23
         cache-dependency-path: go.sum
 
     - name: Setup NodeJS

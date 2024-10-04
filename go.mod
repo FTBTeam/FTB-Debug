@@ -1,8 +1,6 @@
 module ftb-debug-ui
 
-go 1.21
-
-toolchain go1.23.1
+go 1.23
 
 require (
 	github.com/cavaliergopher/grab/v3 v3.0.1

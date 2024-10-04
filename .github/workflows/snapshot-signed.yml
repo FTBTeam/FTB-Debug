@@ -125,13 +125,13 @@ jobs:
 
       - name: Codesign & Notarize
         run: |
+          echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
           cd ./build/bin
           codesign -s "5372643C69B1D499BDF6EA772082E9CE99E85029" -v ./ftb-debug-ui.app --options=runtime --timestamp
           codesign -dv ./ftb-debug-ui.app
-          echo "${{secrets.APPLE_API_KEY}}" > apple_api_key.p8
           zip -r ../../out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip ftb-debug-ui.app
           cd ../../out
-          xcrun notarytool submit "./ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip" --key "./apple_api_key.p8" --key-id ${{ secrets.APPLE_API_KEY_ID }} --issuer ${{ secrets.APPLE_API_ISSUER }} --wait
+          xcrun notarytool submit "./ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip" --key "../apple_api_key.p8" --key-id ${{ secrets.APPLE_API_KEY_ID }} --issuer ${{ secrets.APPLE_API_ISSUER }} --wait
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
