@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=${{env.GITHUB_SHA_SHORT}}' -X 'main.Version=${{env.GITHUB_REF_NAME}}'"
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -webview2 embed -trimpath -ldflags "-s -w -X 'main.GitCommit=${{env.GITHUB_SHA_SHORT}}' -X 'main.Version=${{env.GITHUB_REF_NAME}}'"
           mkdir -p ./out
           mv ./build/bin/ftb-debug-ui.exe ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.exe
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build
         run: |
-          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -webview2 embed -trimpath -ldflags "-s -w -X 'main.GitCommit=$(GITHUB_SHA_SHORT)' -X 'main.Version=$(GITHUB_REF_NAME)'"
           mkdir -p ./out
           mv ./build/bin/ftb-debug-ui ./out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
 
@@ -96,7 +96,7 @@ jobs:
 
       - name: Build
         run: |
-          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -trimpath -ldflags "-s -w -X 'shared.GitCommit=$(GITHUB_SHA_SHORT)' -X 'shared.Version=$(GITHUB_REF_NAME)'"
+          wails build -clean -platform ${{ matrix.goos }}/${{ matrix.goarch }} -webview2 embed -trimpath -ldflags "-s -w -X 'shared.GitCommit=$(GITHUB_SHA_SHORT)' -X 'shared.Version=$(GITHUB_REF_NAME)'"
           mkdir -p ./out
           cd ./build/bin; zip -r ../../out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}.zip ftb-debug-ui.app
 
