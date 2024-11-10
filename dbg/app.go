@@ -209,7 +209,20 @@ func getAppVersion() (AppMeta, error) {
 }
 
 func getProfiles() (Profiles, error) {
-	profilesPath := filepath.Join(ftbApp.InstallLocation, "profiles.json")
+	oldProfilesPath := filepath.Join(ftbApp.InstallLocation, "profiles.json")
+	oldProfilesExists := shared.DoesPathExist(oldProfilesPath)
+	if oldProfilesExists {
+		profilesRaw, err := os.ReadFile(oldProfilesPath)
+		if err != nil {
+			return Profiles{}, err
+		}
+		var profiles Profiles
+		if err := json.Unmarshal(profilesRaw, &profiles); err != nil {
+			return Profiles{}, err
+		}
+		return profiles, nil
+	}
+	profilesPath := filepath.Join(ftbApp.InstallLocation, "storage", "mc-accounts.json")
 	profilesExists := shared.DoesPathExist(profilesPath)
 	if profilesExists {
 		profilesRaw, err := os.ReadFile(profilesPath)
@@ -222,7 +235,7 @@ func getProfiles() (Profiles, error) {
 		}
 		return profiles, nil
 	}
-	return Profiles{}, errors.New("profiles.json not found")
+	return Profiles{}, errors.New("profiles/mc-accounts.json not found")
 }
 
 func getAppLogs() (map[string]string, error) {

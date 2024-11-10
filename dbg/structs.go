@@ -189,9 +189,13 @@ type (
 	Profiles struct {
 		Version  string `json:"version"`
 		Profiles []struct {
-			UUID      string `json:"uuid"`
-			LastLogin int    `json:"lastLogin"`
-			Username  string `json:"username"`
+			UUID                          string `json:"uuid"`
+			LastLogin                     int    `json:"lastLogin,omitempty"`
+			Username                      string `json:"username,omitempty"`
+			MinecraftUsername             string `json:"minecraftUsername,omitempty"`
+			MinecraftAccessTokenExpiresAt int    `json:"minecraftAccessExpiresAt,omitempty"`
+			MicrosoftAccessTokenExpiresAt int    `json:"microsoftAccessExpiresAt,omitempty"`
+			NotLoggedIn                   bool   `json:"notLoggedIn,omitempty"`
 		} `json:"profiles"`
 		ActiveProfile string `json:"activeProfile"`
 	}
