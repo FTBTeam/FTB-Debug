@@ -8,7 +8,7 @@ import (
 
 var (
 	checkRequestsURLs = map[string]CheckURLStruct{
-		"https://api.feed-the-beast.com/": {
+		"https://api.feed-the-beast.com/v1": {
 			Method:             "HEAD",
 			ValidateResponse:   false,
 			ExpectedStatusCode: http.StatusNotFound,
@@ -57,30 +57,6 @@ var (
 			ExpectedReponse:    "",
 		},
 		"https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml": {
-			Method:             "HEAD",
-			ValidateResponse:   false,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedReponse:    "",
-		},
-		"https://api.modpacks.ch/public/api/ping": {
-			Method:             "GET",
-			ValidateResponse:   true,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedReponse:    "{\"status\":\"success\",\"reply\":\"pong\"}",
-		},
-		"https://apps.modpacks.ch/modpacks/art/112/neotechx512.png": {
-			Method:             "GET",
-			ValidateResponse:   false,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedReponse:    "",
-		},
-		"https://dist.creeper.host/modpacks/art/112/neotechx512.png": {
-			Method:             "HEAD",
-			ValidateResponse:   false,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedReponse:    "",
-		},
-		"https://api.creeper.host/api/health": {
 			Method:             "HEAD",
 			ValidateResponse:   false,
 			ExpectedStatusCode: http.StatusOK,
