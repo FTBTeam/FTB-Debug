@@ -7,7 +7,7 @@ import (
 	"errors"
 	"ftb-debug/v2/shared"
 	"github.com/cavaliergopher/grab/v3"
-	"github.com/codeclysm/extract/v3"
+	"github.com/codeclysm/extract/v4"
 	"github.com/pterm/pterm"
 	"os"
 	"path/filepath"
