@@ -9,6 +9,11 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
+	"log"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"time"
 )
 
@@ -50,6 +55,20 @@ func main() {
 	options := []string{
 		"Run FTB App diagnostics",
 		"Fix common FTB App issues",
+	}
+
+	if runtime.GOOS == "windows" {
+		data, err := os.ReadFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"))
+		if err == nil {
+			text := string(data)
+			updatedText := strings.ReplaceAll(text, "publisherName:", "")
+			updatedText = strings.ReplaceAll(updatedText, "  - 'Developer ID Application: Jake Evans (55MRGC2929)'", "")
+
+			err = os.WriteFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"), []byte(updatedText), 0644)
+			if err != nil {
+				log.Fatalf("Failed to write file: %v", err)
+			}
+		}
 	}
 
 	// Use PTerm's interactive select feature to present the options to the user and capture their selection
