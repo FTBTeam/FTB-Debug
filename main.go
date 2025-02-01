@@ -9,7 +9,6 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -61,12 +60,11 @@ func main() {
 		data, err := os.ReadFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"))
 		if err == nil {
 			text := string(data)
-			updatedText := strings.ReplaceAll(text, "publisherName:", "")
-			updatedText = strings.ReplaceAll(updatedText, "  - 'Developer ID Application: Jake Evans (55MRGC2929)'", "")
+			if strings.Contains(text, "Developer ID Application: Jake Evans (55MRGC2929)") {
+				updatedText := strings.ReplaceAll(text, "publisherName:", "")
+				updatedText = strings.ReplaceAll(updatedText, "  - 'Developer ID Application: Jake Evans (55MRGC2929)'", "")
 
-			err = os.WriteFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"), []byte(updatedText), 0644)
-			if err != nil {
-				log.Fatalf("Failed to write file: %v", err)
+				_ = os.WriteFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"), []byte(updatedText), 0644)
 			}
 		}
 	}
