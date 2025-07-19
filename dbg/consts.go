@@ -68,6 +68,54 @@ var (
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedReponse:    "",
 		},
+		"https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedReponse:    "",
+		},
+		"https://login.microsoftonline.com/consumers/oauth2/v2.0/token": {
+			Method:             "POST",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedReponse:    "",
+		},
+		"https://api.minecraftservices.com/authentication/login_with_xbox": {
+			Method:             "POST",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedReponse:    "",
+		},
+		"https://user.auth.xboxlive.com/user/authenticate": {
+			Method:             "POST",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedReponse:    "",
+		},
+		"https://xsts.auth.xboxlive.com/xsts/authorize": {
+			Method:             "POST",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedReponse:    "",
+		},
+		"https://api.minecraftservices.com/entitlements/license?requestId=RANDOM_UUID": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusUnauthorized,
+			ExpectedReponse:    "",
+		},
+		"https://api.minecraftservices.com/entitlements/mcstore": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusUnauthorized,
+			ExpectedReponse:    "",
+		},
+		"https://api.minecraftservices.com/minecraft/profile": {
+			Method:             "GET",
+			ValidateResponse:   false,
+			ExpectedStatusCode: http.StatusUnauthorized,
+			ExpectedReponse:    "",
+		},
 	}
 
 	windowsAppPath  = filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app")

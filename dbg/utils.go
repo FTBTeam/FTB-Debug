@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"ftb-debug/v2/shared"
+	"github.com/google/uuid"
 	"github.com/pterm/pterm"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -17,6 +18,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -177,6 +179,7 @@ func locateFTBAFolder() (string, error) {
 func runNetworkChecks() []NetworkCheck {
 	var nc []NetworkCheck
 	for url, checks := range checkRequestsURLs {
+		url = strings.Replace(url, "RANDOM_UUID", uuid.New().String(), 1)
 		client := &http.Client{}
 		req, err := http.NewRequest(checks.Method, url, nil)
 		if err != nil {
