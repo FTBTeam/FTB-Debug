@@ -4,16 +4,12 @@ import (
 	"flag"
 	"fmt"
 	ftbdbg "ftb-debug/v2/dbg"
-	"ftb-debug/v2/fixes"
 	"ftb-debug/v2/shared"
+	"time"
+
 	"github.com/eiannone/keyboard"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"time"
 )
 
 func init() {
@@ -51,39 +47,8 @@ func init() {
 }
 
 func main() {
-	options := []string{
-		"Run FTB App diagnostics",
-		"Fix common FTB App issues",
-	}
 
-	if runtime.GOOS == "windows" {
-		data, err := os.ReadFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"))
-		if err == nil {
-			text := string(data)
-			if strings.Contains(text, "Developer ID Application: Jake Evans (55MRGC2929)") {
-				updatedText := strings.ReplaceAll(text, "publisherName:", "")
-				updatedText = strings.ReplaceAll(updatedText, "  - 'Developer ID Application: Jake Evans (55MRGC2929)'", "")
-
-				_ = os.WriteFile(filepath.Join(os.Getenv("localappdata"), "Programs", "ftb-app", "resources", "app-update.yml"), []byte(updatedText), 0644)
-			}
-		}
-	}
-
-	// Use PTerm's interactive select feature to present the options to the user and capture their selection
-	// The Show() method displays the options and waits for the user's input
-	selectedOption, _ := pterm.DefaultInteractiveSelect.
-		WithOptions(options).
-		WithFilter(false).
-		Show()
-
-	switch selectedOption {
-	case "Run FTB App diagnostics":
-		ftbdbg.RunDebug()
-	case "Fix common FTB App issues":
-		fixes.FixCommonIssues()
-	default:
-		pterm.Error.Println("Invalid option selected")
-	}
+	ftbdbg.RunDebug()
 
 	pterm.Println(pterm.LightCyan("Press ESC to exit..."))
 
