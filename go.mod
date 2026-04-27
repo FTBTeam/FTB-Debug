@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-version v1.8.0
+	github.com/hashicorp/go-version v1.9.0
 	github.com/pterm/pterm v0.12.83
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/yusufpapurcu/wmi v1.2.4
