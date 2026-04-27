@@ -107,8 +107,8 @@ jobs:
 
       - name: Build
         run: |
-          CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o out/ftb-server-${{ matrix.goos }}-${{ matrix.goarch }} -ldflags "-X 'ftb-server-downloader/util.GitCommit=$GITHUB_SHA_SHORT' -X 'ftb-server-downloader/util.ReleaseVersion=$GITHUB_REF_NAME'"
-          chmod +x out/ftb-server-${{ matrix.goos }}-${{ matrix.goarch }}
+          CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }} -ldflags "-X 'ftb-server-downloader/util.GitCommit=$GITHUB_SHA_SHORT' -X 'ftb-server-downloader/util.ReleaseVersion=$GITHUB_REF_NAME'"
+          chmod +x out/ftb-debug-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
